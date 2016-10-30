@@ -1,6 +1,6 @@
 # AxisActionEventLib 1.0
 
-Base library that provides connectivity with the new Action and Event web-services for Axis network cameras or devices.
+Base library that provides connectivity with the new Action and Event web-services API of Axis network cameras or devices.
 
 HTTP communication with SOAP/XML message content
 
