@@ -2,7 +2,7 @@
 
 Base library that provides connectivity with the new Action and Event web-services API of Axis network cameras or devices.
 
-HTTP communication with SOAP/XML message content
+HTTP communication with SOAP/XML message content.
 
 Based on services wsdl :
 
@@ -13,4 +13,4 @@ Axis devices action and event web-service address : http://{0}/vapix/services
 
 Quick usage :
 
-- Simply download the AxisActionEventLib.dll file and add it as a new reference to your visual studio project file
+- Simply download the AxisActionEventLib.dll file and add it as a new reference to your visual studio project file and use the object browser to explore the ActionEventLib namespace
