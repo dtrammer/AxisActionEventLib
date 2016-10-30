@@ -13,4 +13,4 @@ Axis devices action and event web-service address : http://{0}/vapix/services
 
 Quick usage :
 
-- Simple download the AxisActionEventLib.dll file and add it as a new reference to your visual studio project file
+- Simply download the AxisActionEventLib.dll file and add it as a new reference to your visual studio project file
