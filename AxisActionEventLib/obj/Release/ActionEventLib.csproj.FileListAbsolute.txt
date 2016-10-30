@@ -1,0 +1,5 @@
+C:\Users\Apollo\OneDrive\DEV PROJECTS\AxisActionEventLib\AxisActionEventLib\AxisActionEventLib\bin\Release\AxisActionEventLib.dll
+C:\Users\Apollo\OneDrive\DEV PROJECTS\AxisActionEventLib\AxisActionEventLib\AxisActionEventLib\bin\Release\AxisActionEventLib.pdb
+C:\Users\Apollo\OneDrive\DEV PROJECTS\AxisActionEventLib\AxisActionEventLib\AxisActionEventLib\obj\Release\ActionEventLib.csprojResolveAssemblyReference.cache
+C:\Users\Apollo\OneDrive\DEV PROJECTS\AxisActionEventLib\AxisActionEventLib\AxisActionEventLib\obj\Release\AxisActionEventLib.dll
+C:\Users\Apollo\OneDrive\DEV PROJECTS\AxisActionEventLib\AxisActionEventLib\AxisActionEventLib\obj\Release\AxisActionEventLib.pdb
