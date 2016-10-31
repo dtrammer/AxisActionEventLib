@@ -19,14 +19,10 @@ namespace ActionEventLib.types
         public string Content;
     }
 
-    public sealed class GetActionTemplatesResponse : ServiceResponse { public List<ActionTemplate> Templates; }
-
-    public sealed class GetRecipientTemplatesResponse : ServiceResponse { public List<RecipientTemplate> Templates; }
-    public sealed class GetActionConfigurationsResponse : ServiceResponse { public List<ActionConfiguration> Configurations; }
-    
-    public sealed class GetActionRulesResponse : ServiceResponse { public List<ActionRule> ActionRules; }
-
-    public sealed class GetRecipientConfigurationsResponse : ServiceResponse { public List<RecipientConfiguration> Configurations; }
-    
-    public sealed class GetEventInstancesResponse : ServiceResponse { public List<EventTrigger> Instances; }
+    public sealed class GetActionTemplatesResponse : ServiceResponse { public List<ActionTemplate> Templates = new List<ActionTemplate>(); }
+    public sealed class GetRecipientTemplatesResponse : ServiceResponse { public List<RecipientTemplate> Templates = new List<RecipientTemplate>(); }
+    public sealed class GetActionConfigurationsResponse : ServiceResponse { public List<ActionConfiguration> Configurations = new List<ActionConfiguration>(); }
+    public sealed class GetActionRulesResponse : ServiceResponse { public List<ActionRule> ActionRules = new List<ActionRule>(); }
+    public sealed class GetRecipientConfigurationsResponse : ServiceResponse { public List<RecipientConfiguration> Configurations = new List<RecipientConfiguration>(); }
+    public sealed class GetEventInstancesResponse : ServiceResponse { public List<EventTrigger> Instances = new List<EventTrigger>(); }
 }
