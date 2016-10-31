@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ActionEventLib.actions
+namespace ActionEventLib.action
 {
     /// <summary>
     /// Class that provides methods to query the Actions webservice API of Axis network devices
