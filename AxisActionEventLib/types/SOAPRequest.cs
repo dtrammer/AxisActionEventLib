@@ -54,17 +54,20 @@ namespace ActionEventLib.types
                     using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, string.Format(Service_URL, IP)) { Version = HttpVersion.Version10 })
                     {
                         request.Content = new StringContent(string.Format(_message_base, Action));
-                        Console.WriteLine(string.Format(_message_base, Action));
 
                         HttpResponseMessage Response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
 
                         if (Response.IsSuccessStatusCode)
                         {
-                            serviceResponse.IsSuccess = true; serviceResponse.Content = await Response.Content.ReadAsStringAsync(); serviceResponse.HttpStatusCode = Response.StatusCode;
-                            serviceResponse.SOAPContent = XElement.Parse(serviceResponse.Content);
+                            serviceResponse.IsSuccess = true; serviceResponse.HttpStatusCode = Response.StatusCode;
+                            serviceResponse.SOAPContent = XElement.Parse(await Response.Content.ReadAsStringAsync());
                         }
                         else
-                            serviceResponse.IsSuccess = false; serviceResponse.Content = await Response.Content.ReadAsStringAsync(); serviceResponse.HttpStatusCode = Response.StatusCode;
+                        {
+                            serviceResponse.IsSuccess = false;
+                            serviceResponse.Content = await Response.Content.ReadAsStringAsync();
+                            serviceResponse.HttpStatusCode = Response.StatusCode;
+                        }
 
                     }
                 }catch(Exception ex)
@@ -96,6 +99,10 @@ namespace ActionEventLib.types
 
         protected GetActionTemplatesResponse parseGetActionTemplatesResponse(ServiceResponse Response) {
             GetActionTemplatesResponse response = new GetActionTemplatesResponse();
+            response.IsSuccess = Response.IsSuccess;
+            response.SOAPContent = Response.SOAPContent;
+            response.HttpStatusCode = Response.HttpStatusCode;
+            response.Content = Response.Content;
             try
             {
                 XElement templates = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionTemplatesResponse").Element(NS_ACTION + "ActionTemplates");
@@ -126,6 +133,12 @@ namespace ActionEventLib.types
         }
         protected GetRecipientTemplatesResponse parseGetRecipientTemplatesResponse (ServiceResponse Response) {
             GetRecipientTemplatesResponse response = new GetRecipientTemplatesResponse();
+
+            response.IsSuccess = Response.IsSuccess;
+            response.SOAPContent = Response.SOAPContent;
+            response.HttpStatusCode = Response.HttpStatusCode;
+            response.Content = Response.Content;
+
             try
             {
                 XElement templates = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetRecipientTemplatesResponse").Element(NS_ACTION + "RecipientTemplates");
@@ -153,6 +166,10 @@ namespace ActionEventLib.types
         }
         protected GetActionConfigurationsResponse parseGetActionConfigResponse(ServiceResponse Response) {
             GetActionConfigurationsResponse response = new GetActionConfigurationsResponse();
+            response.IsSuccess = Response.IsSuccess;
+            response.SOAPContent = Response.SOAPContent;
+            response.HttpStatusCode = Response.HttpStatusCode;
+            response.Content = Response.Content;
             try
             {
                 XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionConfigurationsResponse").Element(NS_ACTION + "ActionConfigurations");
@@ -182,6 +199,10 @@ namespace ActionEventLib.types
         }
         protected GetActionRulesResponse parseGetActionRulesResponse(ServiceResponse Response) {
             GetActionRulesResponse response = new GetActionRulesResponse();
+            response.IsSuccess = Response.IsSuccess;
+            response.SOAPContent = Response.SOAPContent;
+            response.HttpStatusCode = Response.HttpStatusCode;
+            response.Content = Response.Content;
             try
             {
                 XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionRulesResponse").Element(NS_ACTION + "ActionRules");
@@ -240,6 +261,10 @@ namespace ActionEventLib.types
         }
         protected GetRecipientConfigurationsResponse parseGetRecipientConfigurations(ServiceResponse Response) {
             GetRecipientConfigurationsResponse response = new GetRecipientConfigurationsResponse();
+            response.IsSuccess = Response.IsSuccess;
+            response.SOAPContent = Response.SOAPContent;
+            response.HttpStatusCode = Response.HttpStatusCode;
+            response.Content = Response.Content;
             try
             {
                 XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetRecipientConfigurationsResponse").Element(NS_ACTION + "RecipientConfigurations");
@@ -273,6 +298,10 @@ namespace ActionEventLib.types
         protected GetEventInstancesResponse parseGetEventInstancesResponse(ServiceResponse Response)
         {
             GetEventInstancesResponse response = new GetEventInstancesResponse();
+            response.IsSuccess = Response.IsSuccess;
+            response.SOAPContent = Response.SOAPContent;
+            response.HttpStatusCode = Response.HttpStatusCode;
+            response.Content = Response.Content;
             try
             {
                 XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_EVENT + "GetEventInstancesResponse").Element(NS_WTOPIC + "TopicSet");
