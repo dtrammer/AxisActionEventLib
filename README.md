@@ -19,9 +19,9 @@ Quick usage :
 
 SAMPLE : 
 
-ActionService actionService = new ActionService();
+ActionService actionService = new ActionService();</br>
 GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync("IP", "user", "pass");
 
-EventService eventService = new EventService();
+EventService eventService = new EventService();</br>
 GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync("IP", "user", "pass");
 
