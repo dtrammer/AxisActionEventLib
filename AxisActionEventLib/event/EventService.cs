@@ -1,6 +1,7 @@
 ﻿
 using ActionEventLib.events;
 using ActionEventLib.types;
+using AxisActionEventLib.events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,16 +69,8 @@ namespace ActionEventLib.events
         /// <param name="EventID">An ID for the event</param>
         /// <param name="Name">A name for the event</param>
         /// <returns>ServiceResponse</returns>
-        public async Task<ServiceResponse> AddScheduledEventAsync(string IP, string User, string Password, ICalendar Schedule, string EventID = "" , string Name = "") {
-            String bodyAction = @"<even:AddScheduledEvent>" +
-                                @"<even:NewScheduledEvent>" +
-                                (!string.IsNullOrEmpty(EventID) ? @"<even:EventID>" + EventID + @"</even:EventID>" : "") +
-                                (!string.IsNullOrEmpty(Name) ? @"<even:Name>" + Name + @"</even:Name>" : "") +
-                                @"<even:Schedule><even:ICalendar Dialect=""http://www.axis.com/vapix/ws/ical1"">" + Schedule.ToString() + @"</even:ICalendar></even:Schedule>" +
-                                @"</even:NewScheduledEvent>" + 
-                                @"</even:AddScheduledEvent>";
-
-            return await base.sendRequestAsync( IP , User , Password, bodyAction);
+        public async Task<ServiceResponse> AddScheduledEventAsync(string IP, string User, string Password, ScheduledEvent Event) {
+            return await base.sendRequestAsync( IP , User , Password, @"<even:AddScheduledEvent><even:NewScheduledEvent>" + Event.ToString() + @"</even:NewScheduledEvent></even:AddScheduledEvent>");
         }
 
         /// <summary>
