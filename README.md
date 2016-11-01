@@ -17,6 +17,7 @@ Quick usage :
 
 - Use the ActionEventLib.action.ActionService and ActionEventLib.event.EventService objects to query the web-service
 
-- ActionService actionService = new ActionService();
-  ServiceResponse response = await actionService.GetActionTemplatesAsync("IP", "user", "pass");
-
+<code>
+ActionService actionService = new ActionService();
+ServiceResponse response = await actionService.GetActionTemplatesAsync("IP", "user", "pass");
+</code>
