@@ -32,10 +32,17 @@ GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync(
 <h3>ServiceResponse members:</h3>
 <table>
 <tr>
-<td>bool IsSuccess;</td><td><i>//True if HTTP response 200 OK</i></td>
+<td>bool IsSuccess</td><td>True if HTTP request succeeded with 200 OK</td>
 </tr>
-</br>HttpStatusCode HttpStatusCode; <i>//HTTP Response status code</i>
-</br>XElement SOAPContent; <i>//An Linq XElement object containing the HTTP response XML content</i>
-</br>string Content; <i>//Scalar or other values are returned here, it will also contain possible exception messages</i>
+<tr>
+<td>HttpStatusCode HttpStatusCode</td><td>HTTP Response status code</td>
+</tr>
+<tr>
+<td>XElement SOAPContent</td><td>An Linq XElement object containing the HTTP response XML content</td>
+</tr>
+<tr>
+<td>string Content</td><td>Scalar or other values are returned here, it will also contain possible exception messages</td>
+</tr>
+</table>
 
 - Exceptions are processed caught and if happen the serviceResponse .isSuccess property will be false and the Content property will contain the exception message
