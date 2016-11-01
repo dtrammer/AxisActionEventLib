@@ -30,10 +30,9 @@ GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync(
 - ActionService and EventService inherit abstract base class SOAPRequest. It uses one method sendRequestAsync(...) to send a http request and returns a serviceResponse object which is a base object wrapping the http request response state and XML content. All the other more specific Responses objects inherit from serviceResponse
 
 <h3>ServiceResponse members:</h3>
-</br>
-</br><h4>bool IsSuccess</h4>; //True if HTTP response 200 OK
-</br>HttpStatusCode HttpStatusCode; //HTTP Response status code
-</br>XElement SOAPContent; //An Linq XElement object containing the HTTP response XML content
-</br>string Content; //Scalar values are returned here
+</br>bool IsSuccess; <i>//True if HTTP response 200 OK</i>
+</br>HttpStatusCode HttpStatusCode; <i>//HTTP Response status code</i>
+</br>XElement SOAPContent; <i>//An Linq XElement object containing the HTTP response XML content</i>
+</br>string Content; <i>//Scalar or other values are returned here, it will also contain possible exception messages</i>
 
 - Exceptions are processed caught and if happen the serviceResponse .isSuccess property will be false and the Content property will contain the exception message
