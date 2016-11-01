@@ -18,10 +18,10 @@ Quick usage :
 - Use the ActionEventLib.action.ActionService and ActionEventLib.event.EventService objects to query the web-service
 
 SAMPLE : 
-
+<code style="background-color: #f5f5f5;padding: 10px;">
 ActionService actionService = new ActionService();</br>
 GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync("IP", "user", "pass");
 
 EventService eventService = new EventService();</br>
 GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync("IP", "user", "pass");
-
+</code>
