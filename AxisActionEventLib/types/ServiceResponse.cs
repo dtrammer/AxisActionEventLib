@@ -1,6 +1,7 @@
 ﻿using ActionEventLib.action;
 using ActionEventLib.events;
 using ActionEventLib.templates;
+using AxisActionEventLib.events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +20,12 @@ namespace ActionEventLib.types
         public string Content;
     }
 
-    public sealed class GetActionTemplatesResponse : ServiceResponse { public List<ActionTemplate> Templates = new List<ActionTemplate>(); }
-    public sealed class GetRecipientTemplatesResponse : ServiceResponse { public List<RecipientTemplate> Templates = new List<RecipientTemplate>(); }
-    public sealed class GetActionConfigurationsResponse : ServiceResponse { public List<ActionConfiguration> Configurations = new List<ActionConfiguration>(); }
-    public sealed class GetActionRulesResponse : ServiceResponse { public List<ActionRule> ActionRules = new List<ActionRule>(); }
-    public sealed class GetRecipientConfigurationsResponse : ServiceResponse { public List<RecipientConfiguration> Configurations = new List<RecipientConfiguration>(); }
-    public sealed class GetEventInstancesResponse : ServiceResponse { public List<EventTrigger> Instances = new List<EventTrigger>(); }
+    public class GetActionTemplatesResponse : ServiceResponse { public List<ActionTemplate> Templates = new List<ActionTemplate>(); }
+    public class GetRecipientTemplatesResponse : ServiceResponse { public List<RecipientTemplate> Templates = new List<RecipientTemplate>(); }
+    public class GetActionConfigurationsResponse : ServiceResponse { public List<ActionConfiguration> Configurations = new List<ActionConfiguration>(); }
+    public class GetActionRulesResponse : ServiceResponse { public List<ActionRule> ActionRules = new List<ActionRule>(); }
+    public class GetRecipientConfigurationsResponse : ServiceResponse { public List<RecipientConfiguration> Configurations = new List<RecipientConfiguration>(); }
+    public class GetEventInstancesResponse : ServiceResponse { public List<EventTrigger> Instances = new List<EventTrigger>(); }
+
+    public class GetScheduledEventsResponse : ServiceResponse { public List<ScheduledEvent> ScheduledEvents = new List<ScheduledEvent>();  }
 }
