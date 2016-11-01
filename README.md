@@ -9,7 +9,7 @@ Based on services wsdl's :
 - Action : http://www.axis.com/vapix/ws/action1/ActionService.wsdl
 - Events : http://www.axis.com/vapix/ws/event1/EventService.wsdl
 
-Simply download the AxisActionEventLib.dll file and add it as a new reference to your visual studio project file and use the object browser to explore the ActionEventLib namespace
+Simply download the AxisActionEventLib.dll file in the list above and add a new reference to your visual studio project file and use the object browser to explore the ActionEventLib namespace
 
 Quick usage :
 
@@ -21,4 +21,7 @@ SAMPLE :
 <code>
 ActionService actionService = new ActionService();
 GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync("IP", "user", "pass");
+
+EventService eventService = new EventService();
+GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync("IP", "user", "pass");
 </code>
