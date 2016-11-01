@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace ActionEventLib.action
 {
+    /// <summary>
+    /// Class representing an Actionrule, base to setup an event on a device. 
+    /// It contains a reference to an ActionConfiguration object that is needed to setup the event.
+    /// </summary>
     public class ActionRule
     {
         public int RuleID;
