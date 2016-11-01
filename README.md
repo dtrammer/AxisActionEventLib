@@ -42,9 +42,9 @@ GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync(
 <td>HttpStatusCode StatusCode</td><td>HTTP Response status code</td>
 </tr>
 <tr>
-<td>XElement SOAPContent</td><td>A Linq XElement object containing the HTTP XML response body</td>
+<td>XElement SOAPContent</td><td>A Linq XElement object containing the XML body of HTTP response, if any</td>
 </tr>
 <tr>
-<td>string Content</td><td>The http response content, it can also contain exception messages if an exception was raised</td>
+<td>string Content</td><td>The http response content, it can also contain exception messages if one is raised</td>
 </tr>
 </table>
