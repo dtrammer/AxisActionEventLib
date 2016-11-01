@@ -1,4 +1,4 @@
-<H1># AxisActionEventLib 1.0</H1>
+<H2># AxisActionEventLib 1.0</H2>
 
 Base library that provides connectivity with the new Action and Event web-services API of Axis network cameras or devices.
 
@@ -11,18 +11,18 @@ Based on services wsdl's :
 
 Simply download the AxisActionEventLib.dll file in the list above and add a new reference to your visual studio project file and use the object browser to explore the ActionEventLib namespace
 
-Quick usage :
+<H3>Quick usage :</H3>
 
 - Axis devices action and event web-service address : http://yourip/vapix/services
 
 - Use the ActionEventLib.action.ActionService and ActionEventLib.event.EventService objects to query the web-service
 
-<h2>SAMPLE :</h2>
-<div style="background-color: #f8f8f8;padding: 10px;">
+<h3>Sample :</h3>
+
 ActionService actionService = new ActionService();</br>
 GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync("IP", "user", "pass");
 </br>
 EventService eventService = new EventService();</br>
 GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync("IP", "user", "pass");
-</code>
-</div>
+
+
