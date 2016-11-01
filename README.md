@@ -31,6 +31,8 @@ GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync(
 
 - Exceptions are caught and if happen the serviceResponse .isSuccess property will be false and the Content property will contain the exception message
 
+- The device service address is default hardcoded too the address mentionned above, you can change it by assigning the Service_URL property of the service object
+
 <h3>ServiceResponse members:</h3>
 <table>
 <tr>
