@@ -25,4 +25,12 @@ GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsyn
 EventService eventService = new EventService();</br>
 GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync("IP", "user", "pass");
 
+<h3>Comments :</h3>
 
+- ActionService and EventService inherit abstract base class SOAPRequest. It uses one method sendRequestAsync(string IP, string User , string Password, string Action) to send a http request and returns a serviceResponse object which is a base object wrapping the http request response state and XML content. All the other more specific responses objects inherit from serviceResponse
+
+- serviceResponse :
+    bool IsSuccess; //True if HTTP response 200 OK
+    HttpStatusCode HttpStatusCode; //HTTP Response status code
+    XElement SOAPContent; //An Linq XElement object containing the HTTP response XML content
+    string Content; //Scalar values are returned here 
