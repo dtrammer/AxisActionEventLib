@@ -1,8 +1,3 @@
-<!doctype html>
-<HTML>
-<HEAD>
-</HEAD>
-<BODY>
 <H2># AxisActionEventLib 1.0</H2>
 
 Base library that provides connectivity with the new Action and Event web-services API of Axis network cameras or devices.
@@ -53,5 +48,3 @@ GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync(
       <td>string Content</td><td>Http response content, it can also contain exception messages if one is raised</td>
       </tr>
     </table>
-</BODY>
-</HTML>
