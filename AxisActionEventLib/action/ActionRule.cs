@@ -13,7 +13,7 @@ namespace ActionEventLib.action
     /// </summary>
     public class ActionRule
     {
-        public int RuleID;
+        public int RuleID = 0;
         public string Name;
         public bool Enabled;
 
@@ -29,7 +29,7 @@ namespace ActionEventLib.action
             StringBuilder sb = new StringBuilder();
 
             sb.Append(@"<act:Name>" + this.Name + "</act:Name>");
-            sb.Append(@"<act:Enabled>" + this.Enabled + "</act:Enabled>");
+            sb.Append(@"<act:Enabled>" + (this.Enabled ? "true" : "false") + "</act:Enabled>");
             
             if(this.Trigger != null)
                 sb.Append(@"<act:StartEvent>" + this.Trigger.ToString() + "</act:StartEvent>");

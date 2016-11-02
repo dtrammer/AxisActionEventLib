@@ -8,7 +8,7 @@ namespace ActionEventLib.action
 {
     public class RecipientConfiguration
     {
-        public int ConfigurationID;
+        public int ConfigurationID = 0;
         public string Name;
         public string TemplateToken;
         public Dictionary<string, string> Parameters = new Dictionary<string, string>();
@@ -20,7 +20,9 @@ namespace ActionEventLib.action
             sb.Append("<act:Parameters>");
 
             foreach(KeyValuePair<string,string> entry in this.Parameters)
-                sb.Append("<act:Parameter Name=\"" + entry.Key  +  @"""Value=""" + entry.Value +  @"""/>");
+                sb.Append("<act:Parameter Name=\"" + entry.Key  +  "\" Value=\"" + entry.Value +  "\"/>");
+
+            sb.Append("</act:Parameters>");
 
             return sb.ToString();
         }

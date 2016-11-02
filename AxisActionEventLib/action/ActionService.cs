@@ -46,6 +46,14 @@ namespace ActionEventLib.action
             return parseAddActionConfigResponse(await base.sendRequestAsync(IP, User,  Password, @"<act:AddActionConfiguration><act:NewActionConfiguration>" + Configuration.ToString() + "</act:NewActionConfiguration></act:AddActionConfiguration>"), Configuration);
         }
 
+        public async Task<ServiceResponse> AddActionRule(string IP, string User, string Password, ActionRule NewRule)
+        {
+            string actionBody = @"<act:AddActionRule><act:NewActionRule>"
+                                + NewRule.ToString()
+                                + @"</act:NewActionRule></act:AddActionRule>";
+
+            return this.parseAddActionRuleResponse(await base.sendRequestAsync( IP,  User,  Password, actionBody),NewRule);
+        }
 
 
         /// <summary>
@@ -103,8 +111,6 @@ namespace ActionEventLib.action
         public async Task<GetRecipientConfigurationsResponse> GetRecipientConfigurations(string IP, string User, string Password) {
             return parseGetRecipientConfigurations(await base.sendRequestAsync(IP, User , Password , @"<act:GetRecipientConfigurations/>"));
         }
-
-
 
         /// <summary>
         /// Method to remove an action configuration that is stored on a device
@@ -164,8 +170,7 @@ namespace ActionEventLib.action
         {
             try
             {
-                XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "AddRecipientConfigurationResponse");
-                Response.Content = configResponse.Element(NS_ACTION + "ConfigurationID").Value;
+                Response.Content = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "AddRecipientConfigurationResponse").Element(NS_ACTION + "ConfigurationID").Value;
                 Configuration.ConfigurationID = int.Parse(Response.Content);
             }
             catch (Exception ex)
@@ -176,13 +181,24 @@ namespace ActionEventLib.action
 
             return Response;
         }
+        private ServiceResponse parseAddActionRuleResponse(ServiceResponse Response , ActionRule newRule)
+        {
+            try
+            {
+                Response.Content = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "AddActionRuleResponse").Element(NS_ACTION + "RuleID").Value;
+                newRule.RuleID = int.Parse(Response.Content);
+            }
+            catch (Exception ex)
+            {
+                Response.IsSuccess = false;
+                Response.Content = "[parseAddActionRuleResponse] " + ex.Message;
+            }
+
+            return Response;
+        }
         private GetActionTemplatesResponse parseGetActionTemplatesResponse(ServiceResponse Response)
         {
-            GetActionTemplatesResponse response = new GetActionTemplatesResponse();
-            response.IsSuccess = Response.IsSuccess;
-            response.SOAPContent = Response.SOAPContent;
-            response.HttpStatusCode = Response.HttpStatusCode;
-            response.Content = Response.Content;
+            GetActionTemplatesResponse response = Response.Factory<GetActionTemplatesResponse>();
             try
             {
                 XElement templates = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionTemplatesResponse").Element(NS_ACTION + "ActionTemplates");
@@ -214,12 +230,7 @@ namespace ActionEventLib.action
         }
         private GetRecipientTemplatesResponse parseGetRecipientTemplatesResponse(ServiceResponse Response)
         {
-            GetRecipientTemplatesResponse response = new GetRecipientTemplatesResponse();
-
-            response.IsSuccess = Response.IsSuccess;
-            response.SOAPContent = Response.SOAPContent;
-            response.HttpStatusCode = Response.HttpStatusCode;
-            response.Content = Response.Content;
+            GetRecipientTemplatesResponse response = Response.Factory<GetRecipientTemplatesResponse>();
 
             try
             {
@@ -248,11 +259,7 @@ namespace ActionEventLib.action
         }
         private GetActionConfigurationsResponse parseGetActionConfigResponse(ServiceResponse Response)
         {
-            GetActionConfigurationsResponse response = new GetActionConfigurationsResponse();
-            response.IsSuccess = Response.IsSuccess;
-            response.SOAPContent = Response.SOAPContent;
-            response.HttpStatusCode = Response.HttpStatusCode;
-            response.Content = Response.Content;
+            GetActionConfigurationsResponse response = Response.Factory<GetActionConfigurationsResponse>();
             try
             {
                 XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionConfigurationsResponse").Element(NS_ACTION + "ActionConfigurations");
@@ -282,11 +289,7 @@ namespace ActionEventLib.action
         }
         private GetActionRulesResponse parseGetActionRulesResponse(ServiceResponse Response)
         {
-            GetActionRulesResponse response = new GetActionRulesResponse();
-            response.IsSuccess = Response.IsSuccess;
-            response.SOAPContent = Response.SOAPContent;
-            response.HttpStatusCode = Response.HttpStatusCode;
-            response.Content = Response.Content;
+            GetActionRulesResponse response = Response.Factory<GetActionRulesResponse>();
             try
             {
                 XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionRulesResponse").Element(NS_ACTION + "ActionRules");
@@ -345,11 +348,7 @@ namespace ActionEventLib.action
         }
         private GetRecipientConfigurationsResponse parseGetRecipientConfigurations(ServiceResponse Response)
         {
-            GetRecipientConfigurationsResponse response = new GetRecipientConfigurationsResponse();
-            response.IsSuccess = Response.IsSuccess;
-            response.SOAPContent = Response.SOAPContent;
-            response.HttpStatusCode = Response.HttpStatusCode;
-            response.Content = Response.Content;
+            GetRecipientConfigurationsResponse response = Response.Factory<GetRecipientConfigurationsResponse>();
             try
             {
                 XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetRecipientConfigurationsResponse").Element(NS_ACTION + "RecipientConfigurations");

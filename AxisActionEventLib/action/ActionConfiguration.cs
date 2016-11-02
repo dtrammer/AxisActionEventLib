@@ -10,7 +10,7 @@ namespace ActionEventLib.action
 {
     public class ActionConfiguration
     {
-        public int ConfigurationID;
+        public int ConfigurationID = 0;
         public string Name;
         public ActionTemplate actionTemplate;
 
