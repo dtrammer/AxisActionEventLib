@@ -28,10 +28,10 @@ namespace ActionEventLib.types
         protected const string NS_TNS1 = @"{http://www.onvif.org/ver10/topics}";
         protected const string NS_TNSAXIS = @"{http://www.axis.com/2009/event/topics}";
         #endregion
-
-        protected string _message_base = "<soap:Envelope xmlns:soap=\"" + (NS_SOAP_ENV.Replace("{", "")).Replace("}", "")
-                                                    + "\" xmlns:act=\"" + (NS_ACTION.Replace("{", "")).Replace("}", "") + "\" xmlns:even=\"" + (NS_EVENT.Replace("{", "")).Replace("}", "") + "\" xmlns:wsnt=\"" + (NS_TOPIC.Replace("{", "")).Replace("}", "")
-                                                    + "\" xmlns:tns1=\"" + (NS_TNS1.Replace("{", "")).Replace("}", "") + "\" xmlns:tt=\"" + (NS_ONVIF.Replace("{", "")).Replace("}", "") + "\" xmlns:tnsaxis=\"" + (NS_TNSAXIS.Replace("{", "")).Replace("}", "") + "\" >"
+        
+        protected string _message_base = "<soap:Envelope xmlns:soap=\"" + NS_SOAP_ENV.Substring(1 , NS_SOAP_ENV.Length - 2)
+                                                    + "\" xmlns:act=\"" + NS_ACTION.Substring(1, NS_ACTION.Length - 2) + "\" xmlns:even=\"" + NS_EVENT.Substring(1, NS_EVENT.Length - 2) + "\" xmlns:wsnt=\"" + NS_TOPIC.Substring(1, NS_TOPIC.Length - 2)
+                                                    + "\" xmlns:tns1=\"" + NS_TNS1.Substring(1, NS_TNS1.Length - 2) + "\" xmlns:tt=\"" + NS_ONVIF.Substring(1, NS_ONVIF.Length - 2) + "\" xmlns:tnsaxis=\"" + NS_TNSAXIS.Substring(1, NS_TNSAXIS.Length - 2) + "\" >"
                                                     + @"<soap:Body>{0}</soap:Body>"
                                                 + @"</soap:Envelope>";
 
@@ -71,7 +71,7 @@ namespace ActionEventLib.types
                         }
                         else
                         {
-                            Console.WriteLine("RESPONSE CONTENT : " + await Response.Content.ReadAsStringAsync());
+                            Console.WriteLine("FAULT RESPONSE CONTENT : " + await Response.Content.ReadAsStringAsync());
                             serviceResponse.IsSuccess = false;
                             serviceResponse.Content = await Response.Content.ReadAsStringAsync();
                             serviceResponse.HttpStatusCode = Response.StatusCode;
