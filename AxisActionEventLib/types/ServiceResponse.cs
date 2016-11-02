@@ -18,6 +18,18 @@ namespace ActionEventLib.types
         public HttpStatusCode HttpStatusCode;
         public XElement SOAPContent;
         public string Content;
+
+        public T Factory<T>() where T : ServiceResponse , new()
+        {
+            T response = new T();
+
+            response.IsSuccess = this.IsSuccess;
+            response.HttpStatusCode = this.HttpStatusCode;
+            response.SOAPContent = this.SOAPContent;
+            response.Content = this.Content;
+
+            return response;
+        }
     }
 
     public class GetActionTemplatesResponse : ServiceResponse { public List<ActionTemplate> Templates = new List<ActionTemplate>(); }

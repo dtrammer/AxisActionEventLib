@@ -26,11 +26,12 @@ namespace ActionEventLib.types
         protected const string NS_TOPIC = @"{http://docs.oasis-open.org/wsn/b-2}";
         protected const string NS_WTOPIC = @"{http://docs.oasis-open.org/wsn/t-1}";
         protected const string NS_TNS1 = @"{http://www.onvif.org/ver10/topics}";
+        protected const string NS_TNSAXIS = @"{http://www.axis.com/2009/event/topics}";
         #endregion
-        
+
         protected string _message_base = "<soap:Envelope xmlns:soap=\"" + (NS_SOAP_ENV.Replace("{", "")).Replace("}", "")
-                                                    + "\" xmlns:act=\"" + (NS_ACTION.Replace("{", "")).Replace("}", "") + "\" xmlns:even=\"" + (NS_EVENT.Replace("{", "")).Replace("}", "") + "\" xmlns:wsnt=\"" + (NS_WTOPIC.Replace("{", "")).Replace("}", "")
-                                                    + "\" xmlns:tnsaxis=\"" + (NS_TNS1.Replace("{", "")).Replace("}", "") + "\" xmlns:tt=\"" + (NS_ONVIF.Replace("{", "")).Replace("}", "") + "\">"
+                                                    + "\" xmlns:act=\"" + (NS_ACTION.Replace("{", "")).Replace("}", "") + "\" xmlns:even=\"" + (NS_EVENT.Replace("{", "")).Replace("}", "") + "\" xmlns:wsnt=\"" + (NS_TOPIC.Replace("{", "")).Replace("}", "")
+                                                    + "\" xmlns:tns1=\"" + (NS_TNS1.Replace("{", "")).Replace("}", "") + "\" xmlns:tt=\"" + (NS_ONVIF.Replace("{", "")).Replace("}", "") + "\" xmlns:tnsaxis=\"" + (NS_TNSAXIS.Replace("{", "")).Replace("}", "") + "\" >"
                                                     + @"<soap:Body>{0}</soap:Body>"
                                                 + @"</soap:Envelope>";
 
@@ -57,18 +58,20 @@ namespace ActionEventLib.types
                         request.Content = new StringContent(string.Format(_message_base, Action));
 
                         //DEBUG
-                        //Console.WriteLine("REQUEST CONTENT : " + await request.Content.ReadAsStringAsync());
+                        Console.WriteLine("REQUEST CONTENT : " + await request.Content.ReadAsStringAsync());
                         //END DEBUG
 
                         HttpResponseMessage Response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
 
                         if (Response.IsSuccessStatusCode)
                         {
+
                             serviceResponse.IsSuccess = true; serviceResponse.HttpStatusCode = Response.StatusCode;
                             serviceResponse.SOAPContent = XElement.Parse(await Response.Content.ReadAsStringAsync());
                         }
                         else
                         {
+                            Console.WriteLine("RESPONSE CONTENT : " + await Response.Content.ReadAsStringAsync());
                             serviceResponse.IsSuccess = false;
                             serviceResponse.Content = await Response.Content.ReadAsStringAsync();
                             serviceResponse.HttpStatusCode = Response.StatusCode;
