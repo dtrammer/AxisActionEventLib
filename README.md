@@ -11,13 +11,17 @@ Based on services wsdl's :
 
 Simply download the AxisActionEventLib.dll file in the list above and add a new reference to your visual studio project file and use the object browser to explore the ActionEventLib namespace
 
-<H3>Quick usage :</H3>
+<h3>Prerequisite</h3>
+
+- .net 4.5.2
+
+<H3>Quick usage</H3>
 
 - Axis devices action and event web-service address : http://yourip/vapix/services
 
 - Use the ActionEventLib.action.ActionService and ActionEventLib.event.EventService objects to query the web-service
 
-<h3>Sample :</h3>
+<h3>Sample</h3>
 
 ActionService actionService = new ActionService();</br>
 GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync("IP", "user", "pass");
@@ -25,7 +29,7 @@ GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsyn
 EventService eventService = new EventService();</br>
 GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync("IP", "user", "pass");
 
-<h3>Comments :</h3>
+<h3>Comments</h3>
 
 - ActionService and EventService inherit abstract base class SOAPRequest. It uses one method sendRequestAsync(...) to send a http request and returns a serviceResponse object which is a base object wrapping the http request response state and XML content. All the other more specific Responses objects inherit from serviceResponse as a base class
 
