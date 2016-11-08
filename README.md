@@ -15,19 +15,9 @@ Simply download the AxisActionEventLib.dll file in the list above and add a new 
 
 - .net 4.5.2
 
-<H3>Quick usage</H3>
+<H3>Intro</H3>
 
-- Axis devices action and event web-service address : http://yourip/vapix/services
-
-- Use the ActionEventLib.action.ActionService and ActionEventLib.event.EventService objects to query the web-service
-
-<h3>Sample</h3>
-
-ActionService actionService = new ActionService();</br>
-GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync("IP", "user", "pass");
-</br>
-EventService eventService = new EventService();</br>
-GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync("IP", "user", "pass");
+To make a long story short ;-) An Event is represented by an ActionRule. An ActionRule is constituted of 1 PrimaryCondition (called EventTrigger in the lib) and 0 or multiple extra conditions (also EventTriggers in the lib) you need at least one of the two possibilities for a valid ActionRule, aka either 1 primary condition and no extra or no primary condition and 1 or multiple extra condition. 
 
 <h3>Comments</h3>
 
@@ -35,7 +25,7 @@ GetEventInstancesResponse Response = await eventService.GetEventsInstancesAsync(
 
 - Exceptions are caught and if happen the serviceResponse .isSuccess property will be false and the Content property will contain the exception message 
 
-- The device service address is default hardcoded too the address mentionned above, you can change it by assigning the Service_URL property of the service object
+- The device service address is default hardcoded too <http://yourip/vapix/services> the address mentionned above, you can change it by assigning the Service_URL property of the service object
 
     <h3>ServiceResponse members:</h3>
     <table>
