@@ -25,6 +25,8 @@ To make a long story short ;-) An Event is represented by an ActionRule witch is
 
 For the ActionRule to be valid you need at least 1 primary condition or 1 extra condition with a valid ActionConfiguration
 
+The primary condition or extra condition are responsible for triggering the ActionRule, those a represented by an EventTrigger
+
 <h3>Comments</h3>
 
 - ActionService and EventService inherit abstract base class SOAPRequest. It uses one method sendRequestAsync(...) to send a http request and returns a serviceResponse object which is a base object wrapping the http request response state and XML content. All the other more specific Responses objects inherit from serviceResponse as a base class
