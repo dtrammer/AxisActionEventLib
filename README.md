@@ -27,7 +27,7 @@ For the ActionRule to be valid you need at least 1 primary condition or 1 extra 
 
 The conditions are responsible for triggering the ActionRule, they contain  are represented as follow :
 
-- Simple form, they will only contain a TopicExpression. For example: tns1:VideoSource/tnsaxis:Tampering
+Simple form, they will only contain a TopicExpression. For example: tns1:VideoSource/tnsaxis:Tampering
 -  
 
 It's recommended to use the GetEventIntances method of the EventService to retrieve the available events  
