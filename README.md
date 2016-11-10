@@ -17,12 +17,13 @@ Simply download the AxisActionEventLib.dll file in the list above and add a new 
 
 <H3>Intro</H3>
 
-To make a long story short ;-) An Event is represented by an ActionRule and an ActionRule is constituted of the following components : 
-- One primary condition (Not mandatory and called EventTrigger in the lib) 
-- One or multiple extra conditions (is neither mandatory and also called EventTrigger in the lib)
-- ActionConfiguration (Is mandatory)
+To make a long story short ;-) An Event is represented by an ActionRule and an ActionRule is composed of the following elements : 
 
-For the ActionRule to be valid you need at least 1 primary condition or 1 extra condition.
+- One primary condition (Not mandatory and called EventTrigger in the lib) 
+- One or multiple extra conditions (Not mandatory and also called EventTrigger in the lib)
+- ActionConfiguration (Mandatory)
+
+! For the ActionRule to be valid you need at least 1 primary condition or 1 extra condition with a valid ActionConfiguration
 
 
 
