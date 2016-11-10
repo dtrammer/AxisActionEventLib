@@ -25,7 +25,7 @@ To make a long story short ;-) An Event is represented by an ActionRule witch is
 
 For the ActionRule to be valid you need at least 1 primary condition or 1 extra condition with a valid ActionConfiguration
 
-The primary condition or extra condition are responsible for triggering the ActionRule, those a represented by an EventTrigger
+The conditions are responsible for triggering the ActionRule, those a represented by an EventTrigger
 
 <h3>Comments</h3>
 
