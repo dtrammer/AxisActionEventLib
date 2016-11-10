@@ -29,7 +29,7 @@ The conditions are responsible for triggering the ActionRule, those a represente
 
 <h3>Comments</h3>
 
-- ActionService and EventService inherit abstract base class SOAPRequest. It uses one method sendRequestAsync(...) to send a http request and returns a serviceResponse object which is a base object wrapping the http request response state and XML content. All the other more specific Responses objects inherit from serviceResponse as a base class
+- ActionService and EventService inherit abstract base class SOAPRequest. It uses one method sendRequestAsync(...) to send a http request and returns a serviceResponse object which is a base object wrapping the http request response state and XML content. All the other more specific Responses objects inherit from serviceResponse.
 
 - Exceptions are caught and if happen the serviceResponse .isSuccess property will be false and the Content property will contain the exception message 
 
