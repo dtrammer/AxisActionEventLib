@@ -23,7 +23,7 @@ To make a long story short ;-) An Event is represented by an ActionRule and an A
 - One or multiple extra conditions (Not mandatory and also called EventTrigger in the lib)
 - ActionConfiguration (Mandatory)
 
-<div style="padding:10px;background-color:#f5f5f5;">
+<div style="padding:10px;background-color:Blue;">
 ! For the ActionRule to be valid you need at least 1 primary condition or 1 extra condition with a valid ActionConfiguration
 </div>
 
