@@ -25,7 +25,12 @@ To make a long story short ;-) An Event is represented by an ActionRule witch is
 
 For the ActionRule to be valid you need at least 1 primary condition or 1 extra condition with a valid ActionConfiguration
 
-The conditions are responsible for triggering the ActionRule, those a represented by an EventTrigger
+The conditions are responsible for triggering the ActionRule, they contain  are represented as follow :
+
+- Simple form, they will only contain a TopicExpression. For example: tns1:VideoSource/tnsaxis:Tampering
+-  
+
+It's recommended to use the GetEventIntances method of the EventService to retrieve the available events  
 
 <h3>Comments</h3>
 
