@@ -27,8 +27,10 @@ For the ActionRule to be valid you need at least 1 primary condition or 1 extra 
 
 The conditions are responsible for triggering the ActionRule, they actually correspond to a EventInstance that can be raised on the device. (Conditions or EventInstances are represented by the EventTrigger class in the library, I will use the name EventTrigger from here)
 
-An EventTrigger has 2 variants, 'simple' and 'extended'. Both have a TopicExpression member which corresponds to the EventInstance name (for example : tns1:VideoSource/tnsaxis:VideoSource/Tampering) that will be raised by the device.
-In the "Simple" variant you only have to assign a TopicExpression value for the EventTrigger to be valid. 
+An EventTrigger has 2 variants, 'simple' and 'extended'. Both have a TopicExpression member which corresponds to the EventInstance name (for example : tns1:VideoSource/tnsaxis:VideoSource/Tampering).
+
+In the "Simple" variant you only have to assign a TopicExpression value for the EventTrigger to be valid.
+
 In the "Extended" variant the EventTrigger will also have to contain EventTriggerParams which are extra parameters or conditions that have to be met for the EventInstance to be raised by the device.
 EventTriggerParams are represented under the form of a KeyValuePair, for example the EventInstance : tns1:Device/tnsaxis:Device/IO/VirtualInput needs the following parameters : 
 - Name="port", Value="1 to 32"
