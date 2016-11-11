@@ -15,7 +15,7 @@ Simply download the AxisActionEventLib.dll file in the list above and add a new 
 
 - .net 4.5.2
 
-<H3>Intro</H3>
+<H3>Actions & Events principles</H3>
 
 To make a long story short ;-) An Event is represented by an ActionRule witch is composed of the following elements : 
 
