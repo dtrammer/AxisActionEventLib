@@ -36,7 +36,7 @@ EventTriggerParams are represented under the form of a KeyValuePair, for example
 
 A complete description of the available EventInstances and their respective parameters can be found in the Axis VAPIX library documentation here : http://www.axis.com/partner_pages/vapix_library/#/subjects/t10037719/section/t10008227/display?section=t10008227-t10008226 
 
-All Axis devices have common EventIntances but some models might have (or not) a particular EventInstance, for example Thermal cameras will have specific EventIntances that are raised in relation with temperatures threshold. 
+All Axis devices have common EventInstances but some models might have (or not) a particular EventInstance, for example Thermal cameras will have specific EventIntances that can be raised in relation with temperatures thresholds. 
 
 Now to make things easy (that's the point of a library right :-), you can use the GetEventIntances(...) method of the EventService object which will return a List<EventTrigger> of available EventIntances for that device. 
 
