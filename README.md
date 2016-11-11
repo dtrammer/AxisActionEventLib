@@ -44,6 +44,9 @@ All Axis devices do share a common set of EventInstances but some models might h
 
 Now to make things easy (that's the point of a library right :-), you can use the GetEventIntances(...) method of the EventService object which will return a GetEventInstancesResponse object that will contain a List<> of available EventTriggers for that device. 
 
+<h4>ActionConfiguration</h4>
+
+
 <h3>Comments</h3>
 
 - ActionService and EventService inherit abstract base class SOAPRequest. It uses one method sendRequestAsync(...) to send a http request and returns a serviceResponse object which is a base object wrapping the http request response state and XML content. All the other more specific Responses objects inherit from serviceResponse.
