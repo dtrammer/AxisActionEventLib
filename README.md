@@ -23,7 +23,7 @@ An Event is represented by an ActionRule whitch is composed of the following ele
 - One or multiple extra conditions
 - ActionConfiguration
 
-For the ActionRule to be valid you need at least 1 primary condition or 1 extra condition with a valid ActionConfiguration
+A valid ActionRule will at least have 1 primary condition or 1 extra condition and a valid ActionConfiguration.
 
 The conditions are responsible for triggering the ActionRule, they actually correspond to an EventInstance that can be raised on the device. (Conditions or EventInstances are represented by the EventTrigger class in the library, I will use the name EventTrigger from here)
 
