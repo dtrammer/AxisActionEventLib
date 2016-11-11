@@ -50,19 +50,3 @@ Now to make things easy (that's the point of a library right :-), you can use th
 - Exceptions are caught and if happen the serviceResponse .isSuccess property will be false and the Content property will contain the exception message 
 
 - The device service address is default hardcoded too <http://yourip/vapix/services> the address mentionned above, you can change it by assigning the Service_URL property of the service object
-
-    <h3>ServiceResponse members:</h3>
-    <table>
-      <tr>
-      <td>bool IsSuccess</td><td>True if the HTTP request was successfull</td>
-      </tr>
-      <tr>
-      <td>HttpStatusCode  StatusCode</td><td>HTTP Response status code</td>
-      </tr>
-      <tr>
-      <td>XElement SOAPContent</td><td>A Linq XElement object containing the HTTP response XML body </td>
-      </tr>
-      <tr>
-      <td>string Content</td><td>Http response content, it can also contain exception messages if one is raised</td>
-      </tr>
-    </table>
