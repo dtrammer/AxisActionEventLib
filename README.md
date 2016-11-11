@@ -34,7 +34,7 @@ EventTriggerParams are represented under the form of a KeyValuePair, for example
 - Name="port", Value="1 to 32"
 - Name="active", Value="1 or 0"
 
-You can find a complete description of the available EventIntances and their respective parameters in the Axis VAPIX library here : http://www.axis.com/partner_pages/vapix_library/#/subjects/t10037719/section/t10008227/display?section=t10008227-t10008226 
+A complete description of the available EventInstances and their respective parameters can be found in the Axis VAPIX library documentation here : http://www.axis.com/partner_pages/vapix_library/#/subjects/t10037719/section/t10008227/display?section=t10008227-t10008226 
 
 All Axis devices have common EventIntances but some models might have (or not) a particular EventInstance, for example Thermal cameras will have specific EventIntances that are raised in relation with temperatures threshold. 
 
