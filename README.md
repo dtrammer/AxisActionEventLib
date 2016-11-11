@@ -25,11 +25,23 @@ To make a long story short ;-) An Event is represented by an ActionRule witch is
 
 For the ActionRule to be valid you need at least 1 primary condition or 1 extra condition with a valid ActionConfiguration
 
-The conditions are responsible for triggering the ActionRule, they contain  are represented as follow :
+The conditions or EventTriggers (I will use the term EventTrigger from here) are responsible for triggering the ActionRule, they come in 2 variants :
 
-- Simple form, they will only contain a TopicExpression. For example: tns1:VideoSource/tnsaxis:Tampering
+- Simple 
+- Extended
 
-It's recommended to use the GetEventIntances method of the EventService to retrieve the available events  
+Both variants have a TopicExpression member which corresponds to the EventInstance name (for example : tns1:VideoSource/tnsaxis:VideoSource/Tampering) that will be raised by the device.
+In the "Simple" variant you only have to assign a TopicExpression value for the EventTrigger to be valid. 
+In the "Extended" variant the EventTrigger will also have to contain EventTriggerParams which are extra parameters or conditions that have to be met for the EventInstance to be raised by the device.
+EventTriggerParams are represented under the form of a KeyValuePair, for example the eventinstance : tns1:Device/tnsaxis:Device/IO/VirtualInput needs the following parameters : 
+- Name="port", Value="1 to 32"
+- Name="active", Value="1 or 0"
+
+You can find a complete description of the available EventIntances and their respective parameters in the Axis VAPIX library here : http://www.axis.com/partner_pages/vapix_library/#/subjects/t10037719/section/t10008227/display?section=t10008227-t10008226 
+
+All Axis devices have common EventIntances but some models might have (or not) a particular EventInstance, for example Thermal cameras will have specific EventIntances that are raised in relation with temperatures tresholds. 
+
+Now to make things easy (that's the point of a library right :-), you can use the GetEventIntances(...) method of the EventService object which will return a List<EventTrigger> of available EventIntances for that device. 
 
 <h3>Comments</h3>
 
