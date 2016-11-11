@@ -19,27 +19,24 @@ Simply download the AxisActionEventLib.dll file in the list above and add a new 
 
 To make a long story short ;-) An Event is represented by an ActionRule witch is composed of the following elements : 
 
-- One primary condition (EventTrigger in the lib) 
-- One or multiple extra conditions (Also EventTrigger in the lib)
+- One primary condition  
+- One or multiple extra conditions
 - ActionConfiguration
 
 For the ActionRule to be valid you need at least 1 primary condition or 1 extra condition with a valid ActionConfiguration
 
-The conditions or EventTriggers (I will use the term EventTrigger from here) are responsible for triggering the ActionRule, they come in 2 variants :
+The conditions are responsible for triggering the ActionRule, they actually correspond to a EventInstance that can be raised on the device. (Conditions or EventInstances are represented by the EventTrigger class in the library, I will use the name EventTrigger from here)
 
-- Simple 
-- Extended
-
-Both variants have a TopicExpression member which corresponds to the EventInstance name (for example : tns1:VideoSource/tnsaxis:VideoSource/Tampering) that will be raised by the device.
+An EventTrigger has 2 variants, 'simple' and 'extended'. Both have a TopicExpression member which corresponds to the EventInstance name (for example : tns1:VideoSource/tnsaxis:VideoSource/Tampering) that will be raised by the device.
 In the "Simple" variant you only have to assign a TopicExpression value for the EventTrigger to be valid. 
 In the "Extended" variant the EventTrigger will also have to contain EventTriggerParams which are extra parameters or conditions that have to be met for the EventInstance to be raised by the device.
-EventTriggerParams are represented under the form of a KeyValuePair, for example the eventinstance : tns1:Device/tnsaxis:Device/IO/VirtualInput needs the following parameters : 
+EventTriggerParams are represented under the form of a KeyValuePair, for example the EventInstance : tns1:Device/tnsaxis:Device/IO/VirtualInput needs the following parameters : 
 - Name="port", Value="1 to 32"
 - Name="active", Value="1 or 0"
 
 You can find a complete description of the available EventIntances and their respective parameters in the Axis VAPIX library here : http://www.axis.com/partner_pages/vapix_library/#/subjects/t10037719/section/t10008227/display?section=t10008227-t10008226 
 
-All Axis devices have common EventIntances but some models might have (or not) a particular EventInstance, for example Thermal cameras will have specific EventIntances that are raised in relation with temperatures tresholds. 
+All Axis devices have common EventIntances but some models might have (or not) a particular EventInstance, for example Thermal cameras will have specific EventIntances that are raised in relation with temperatures threshold. 
 
 Now to make things easy (that's the point of a library right :-), you can use the GetEventIntances(...) method of the EventService object which will return a List<EventTrigger> of available EventIntances for that device. 
 
