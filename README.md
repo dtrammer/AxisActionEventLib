@@ -40,11 +40,9 @@ For example the EventInstance : tns1:Device/tnsaxis:Device/IO/VirtualInput needs
 
 A complete description of the available EventInstances and their respective parameters can be found in the Axis VAPIX library documentation here : http://www.axis.com/partner_pages/vapix_library/#/subjects/t10037719/section/t10008227/display?section=t10008227-t10008226 
 
-All Axis devices do share a common set of EventInstances but some models might have (or not) particular EventInstances, for example Thermal cameras will have specific EventInstances that can be raised in relation with temperatures thresholds. 
+All Axis devices share a common set of EventInstances but some models might have (or not) particular EventInstances, for example Thermal cameras will have specific EventInstances that can be raised in relation with temperatures thresholds. 
 
-Now to make things easy (that's the point of a library right :-), you can use the GetEventIntances(...) method of the EventService object which will return a GetEventInstancesResponse object that will contain a List<> of available EventTriggers for that device. 
-
-<h4>ActionConfiguration</h4>
+Use the GetEventIntances(...) method of the EventService object which will return a GetEventInstancesResponse object that will contain a List<> of EventTriggers that are available. 
 
 <h3>ActionConfiguration</h3>
 <table>
