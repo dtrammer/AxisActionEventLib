@@ -32,13 +32,14 @@ An EventTrigger has 2 variants, 'simple' and 'extended'. Both have a TopicExpres
 In the "Simple" variant you only have to assign a TopicExpression value for the EventTrigger to be valid.
 
 In the "Extended" variant the EventTrigger will also have to contain EventTriggerParams which are extra parameters or conditions that have to be met for the EventInstance to be raised by the device.
-EventTriggerParams are represented under the form of a KeyValuePair, for example the EventInstance : tns1:Device/tnsaxis:Device/IO/VirtualInput needs the following parameters : 
+EventTriggerParams are represented under the form of a KeyValuePair. 
+For example the EventInstance : tns1:Device/tnsaxis:Device/IO/VirtualInput needs the following parameters : 
 - Name="port", Value="1 to 32"
 - Name="active", Value="1 or 0"
 
 A complete description of the available EventInstances and their respective parameters can be found in the Axis VAPIX library documentation here : http://www.axis.com/partner_pages/vapix_library/#/subjects/t10037719/section/t10008227/display?section=t10008227-t10008226 
 
-All Axis devices do share a common set of EventInstances but some models might have (or not) particular EventInstances, for example Thermal cameras will have specific EventIntances that can be raised in relation with temperatures thresholds. 
+All Axis devices do share a common set of EventInstances but some models might have (or not) particular EventInstances, for example Thermal cameras will have specific EventInstances that can be raised in relation with temperatures thresholds. 
 
 Now to make things easy (that's the point of a library right :-), you can use the GetEventIntances(...) method of the EventService object which will return a GetEventInstancesResponse object that will contain a List<> of available EventTriggers for that device. 
 
