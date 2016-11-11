@@ -46,18 +46,12 @@ Now to make things easy (that's the point of a library right :-), you can use th
 
 <h4>ActionConfiguration</h4>
 
-	<h3>ActionConfiguration</h3>
-    <table>
-      <tr>
-      <td>int ConfigurationID</td><td>The id of the configuration, an ID is returned after a successfull call to AddActionConfiguration</td>
-      </tr>
-      <tr>
-      <td>string Name</td><td>The name of the ActionConfiguration</td>
-      </tr>
-      <tr>
-      <td>ActionTemplate actionTemplate</td><td>An ActionTemplate object reference</td>
-      </tr>
-    </table>
+<h3>ActionConfiguration</h3>
+<table>
+<tr><td>int ConfigurationID</td><td>The id of the configuration, an ID is returned after a successfull call to AddActionConfiguration</td></tr>
+<tr><td>string Name</td><td>The name of the ActionConfiguration</td></tr>
+<tr><td>ActionTemplate actionTemplate</td><td>An ActionTemplate object reference</td></tr>
+</table>
 
 <h3>Comments</h3>
 
