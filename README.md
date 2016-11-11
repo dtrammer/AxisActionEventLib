@@ -25,9 +25,9 @@ An Event is represented by an ActionRule whitch is composed of the following ele
 
 For the ActionRule to be valid you need at least 1 primary condition or 1 extra condition with a valid ActionConfiguration
 
-The conditions are responsible for triggering the ActionRule, they actually correspond to a EventInstance that can be raised on the device. (Conditions or EventInstances are represented by the EventTrigger class in the library, I will use the name EventTrigger from here)
+The conditions are responsible for triggering the ActionRule, they actually correspond to an EventInstance that can be raised on the device. (Conditions or EventInstances are represented by the EventTrigger class in the library, I will use the name EventTrigger from here)
 
-An EventTrigger has 2 variants, 'simple' and 'extended'. Both have a TopicExpression member which corresponds to the EventInstance name (for example : tns1:VideoSource/tnsaxis:VideoSource/Tampering).
+An EventTrigger comes in 2 variants, 'simple' and 'extended'. Both have a TopicExpression member which corresponds to the EventInstance name (for example : tns1:VideoSource/tnsaxis:VideoSource/Tampering).
 
 In the "Simple" variant you only have to assign a TopicExpression value for the EventTrigger to be valid.
 
