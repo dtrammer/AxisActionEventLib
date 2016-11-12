@@ -1,4 +1,4 @@
-<H2># AxisActionEventLib 1.0</H2>
+<H2>C# AxisActionEventLib 1.0</H2>
 
 Base library that provides connectivity with the new Action and Event web-services API of Axis network cameras or devices.
 
@@ -20,8 +20,6 @@ Simply download the AxisActionEventLib.dll file in the list above and add a new 
 To understand the concept, structure and terminology of the Action & Event webservices please have a look at the official documentation here : http://www.axis.com/files/manuals/vapix_event_action_56628_en_1404.pdf
 
 <h3>Comments</h3>
-
-- ActionService and EventService inherit abstract base class SOAPRequest. It uses one method sendRequestAsync(...) to send a http request and returns a serviceResponse object which is a base object wrapping the http request response state and XML content. All the other more specific Responses objects inherit from serviceResponse.
 
 - Exceptions are caught and if happen the serviceResponse .isSuccess property will be false and the Content property will contain the exception message 
 
