@@ -25,4 +25,4 @@ To understand the concept, structure and terminology of the Action & Event webse
 
 - Exceptions are caught and if happen the serviceResponse .isSuccess property will be false and the Content property will contain the exception message 
 
-- The device service address is default hardcoded too <http://yourip/vapix/services> the address mentionned above, you can change it by assigning the Service_URL property of the service object
+- The device service address is default hardcoded too <http://yourip/vapix/services>, you can change it by assigning the Service_URL property of the service object
