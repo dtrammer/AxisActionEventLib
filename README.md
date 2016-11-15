@@ -19,6 +19,8 @@ Simply download the AxisActionEventLib.dll file in the list above and add a new 
 
 To understand the concept, structure and terminology of the Action & Event webservices have a look at the official documentation here : http://www.axis.com/files/manuals/vapix_event_action_56628_en_1404.pdf
 
+The library encapsulates and facilitates many of the concepts described in the document.
+
 <h3>Comments</h3>
 
 - Exceptions are caught and if happen the serviceResponse .isSuccess property will be false and the Content property will contain the exception message 
