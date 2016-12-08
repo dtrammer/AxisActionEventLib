@@ -25,3 +25,6 @@ The library encapsulates and facilitates many of the concepts described in the d
 
 - The default service address of Axis devices is <http://yourip/vapix/services>, this is used by default. This can be changed by assigning the Service_URL property of the service object
 
+- For sample usage see the UnitTest class 
+      
+    
