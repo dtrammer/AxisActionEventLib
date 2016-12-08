@@ -46,8 +46,6 @@ namespace ActionEventLib.events
                 return this.parseGetScheduledEventsResponse(await base.sendRequestAsync(IP, User, Password, @"<even:GetScheduledEvents><even:ScheduleFilter><even:ScheduleType>" + ScheduleType + @"</even:ScheduleFilter></even:GetScheduledEvents>"));
         }
 
-
-
         /// <summary>
         /// Method that can be used to change the state of a virtual input port on the device
         /// </summary>
