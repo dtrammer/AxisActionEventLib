@@ -8,11 +8,7 @@ using System.Threading.Tasks;
 namespace ActionEventLib.events
 {
     /// <summary>
-    /// Class used by the event service to setup a scheduled event
-    /// It represents a schedule in the following format
-    /// DTSTART:19700103T000000\n
-    /// DTEND:19700105T000000\n
-    /// RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR
+    /// Class representing a ICalender schedule
     /// </summary>
     public class ICalendar
     {
@@ -29,6 +25,13 @@ namespace ActionEventLib.events
 
 
         #region constructors
+
+        private ICalendar(ScheduleFrequency Frequency , DateTime Start , DateTime End)
+        {
+            m_scheduleFrequency = Frequency;
+            m_startDateTime = Start;
+            m_endDateTime = End;
+        }
 
         /// <summary>
         /// Constructor to create a recurrence (pulse event)
@@ -50,12 +53,12 @@ namespace ActionEventLib.events
         /// <param name="StartTime"></param>
         /// <param name="EndTime"></param>
         /// <param name="Days">An array of ICalendarDays elements that represent days of the week (ex: MO, TU, WE ...)</param>
-        public ICalendar(ScheduleTime StartTime , ScheduleTime EndTime , ScheduleDay[] Days)
+        public ICalendar(ScheduleTime StartTime , ScheduleTime EndTime , ScheduleDay[] Days) : this (ScheduleFrequency.DAILY , new DateTime(1970, 01, 01, StartTime.Hour, StartTime.Minutes, StartTime.Seconds) , new DateTime(1970, 01, 01, EndTime.Hour, EndTime.Minutes, EndTime.Seconds))
         {
-            m_scheduleFrequency = ScheduleFrequency.DAILY;
-            m_startDateTime = new DateTime(1970, 01, 01, StartTime.Hour, StartTime.Minutes, StartTime.Seconds);
-            m_endDateTime = new DateTime(1970, 01, 01, EndTime.Hour, EndTime.Minutes, EndTime.Seconds);
-            m_days = Days;
+            if (!Days.Any())
+                throw new Exception("[ICalendar:DailySchedule] Days array argument cannot be empty");
+            else
+                m_days = Days;
         }
 
         /// <summary>
@@ -65,12 +68,12 @@ namespace ActionEventLib.events
         /// <param name="StartTime"></param>
         /// <param name="EndDay"></param>
         /// <param name="EndTime"></param>
-        public ICalendar(ScheduleDay StartDay , ScheduleTime StartTime , ScheduleDay EndDay , ScheduleTime EndTime)
-        {
-            m_scheduleFrequency = ScheduleFrequency.WEEKLY;
-            m_startDateTime = new DateTime(1970, 01, (int)StartDay, StartTime.Hour, StartTime.Minutes, StartTime.Seconds);
-            m_endDateTime = new DateTime(1970, 01, (int)EndDay, EndTime.Hour, EndTime.Minutes, EndTime.Seconds);
-        }
+        public ICalendar(ScheduleDay StartDay , ScheduleTime StartTime , ScheduleDay EndDay , ScheduleTime EndTime) : this ( 
+            ScheduleFrequency.WEEKLY ,
+            new DateTime(1970, 01, (int)StartDay, StartTime.Hour, StartTime.Minutes, StartTime.Seconds),
+            new DateTime(1970, 01, (int)EndDay, EndTime.Hour, EndTime.Minutes, EndTime.Seconds)
+        )
+        { }
 
         /// <summary>
         /// Constructor for a monthly schedule and specify for which months it applies
@@ -80,11 +83,8 @@ namespace ActionEventLib.events
         /// <param name="EndDate">End date, value between 1-31</param>
         /// <param name="EndTime">End time</param>
         /// <param name="Months"></param>
-        public ICalendar(int StartDate , ScheduleTime StartTime , int EndDate , ScheduleTime EndTime , ScheduleMonth[] Months)
+        public ICalendar(int StartDate , ScheduleTime StartTime , int EndDate , ScheduleTime EndTime , ScheduleMonth[] Months) : this (ScheduleFrequency.MONTHLY , new DateTime(1970, 01, StartDate, StartTime.Hour, StartTime.Minutes, StartTime.Seconds), new DateTime(1970, 01, EndDate, EndTime.Hour, EndTime.Minutes, EndTime.Seconds))
         {
-            m_scheduleFrequency = ScheduleFrequency.MONTHLY;
-            m_startDateTime = new DateTime(1970, 01, StartDate, StartTime.Hour, StartTime.Minutes, StartTime.Seconds);
-            m_endDateTime = new DateTime(1970, 01, EndDate, EndTime.Hour, EndTime.Minutes, EndTime.Seconds);
             if (!Months.Any())
                 throw new Exception("[ICalendar:MonthlySchedule] Months array argument cannot be empty");
             else
@@ -100,13 +100,13 @@ namespace ActionEventLib.events
         /// <param name="EndMonth"></param>
         /// <param name="EndDate">The date, value between 1-31</param>
         /// <param name="Endtime"></param>
-        public ICalendar(ScheduleMonth StartMonth, int StartDate , ScheduleTime StartTime , ScheduleMonth EndMonth , int EndDate , ScheduleTime Endtime)
-        {
-            m_scheduleFrequency = ScheduleFrequency.YEARLY;
-            m_startDateTime = new DateTime(1970, (int)StartMonth, StartDate, StartTime.Hour, StartTime.Minutes, StartTime.Seconds);
-            m_endDateTime = new DateTime(1970, (int)EndMonth, EndDate, Endtime.Hour, Endtime.Minutes, Endtime.Seconds);
+        public ICalendar(ScheduleMonth StartMonth, int StartDate , ScheduleTime StartTime , ScheduleMonth EndMonth , int EndDate , ScheduleTime Endtime) : this(
+            ScheduleFrequency.YEARLY,
+            new DateTime(1970, (int)StartMonth, StartDate, StartTime.Hour, StartTime.Minutes, StartTime.Seconds),
+            new DateTime(1970, (int)EndMonth, EndDate, Endtime.Hour, Endtime.Minutes, Endtime.Seconds)
+        )
+        { }
 
-        }
         #endregion
 
         /// <summary>
