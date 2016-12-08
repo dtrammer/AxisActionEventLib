@@ -23,6 +23,5 @@ The library encapsulates and facilitates many of the concepts described in the d
 
 <h3>Comments</h3>
 
-- Exceptions are caught and if happen the serviceResponse .isSuccess property will be false and the Content property will contain the exception message 
+- The default service address of Axis devices is <http://yourip/vapix/services>, this is used by default. This can be changed by assigning the Service_URL property of the service object
 
-- The device service address is default hardcoded too <http://yourip/vapix/services>, you can change it by assigning the Service_URL property of the service object
