@@ -13,7 +13,7 @@ namespace ActionEventLib.templates
     public class RecipientTemplate
     {
         public string TemplateToken;
-        public Dictionary<string, string> Parameters = new Dictionary<string, string>(); //Key = Parameter Name attribute
+        public Dictionary<string, string> Parameters = new Dictionary<string, string>(); 
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();

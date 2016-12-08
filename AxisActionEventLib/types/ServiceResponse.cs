@@ -21,14 +21,7 @@ namespace ActionEventLib.types
 
         public T Factory<T>() where T : ServiceResponse , new()
         {
-            T response = new T();
-
-            response.IsSuccess = this.IsSuccess;
-            response.HttpStatusCode = this.HttpStatusCode;
-            response.SOAPContent = this.SOAPContent;
-            response.Content = this.Content;
-
-            return response;
+            return new T() { IsSuccess = this.IsSuccess , HttpStatusCode = this.HttpStatusCode , SOAPContent = this.SOAPContent , Content = this.Content };
         }
     }
 
@@ -37,7 +30,39 @@ namespace ActionEventLib.types
     public class GetActionConfigurationsResponse : ServiceResponse { public List<ActionConfiguration> Configurations = new List<ActionConfiguration>(); }
     public class GetActionRulesResponse : ServiceResponse { public List<ActionRule> ActionRules = new List<ActionRule>(); }
     public class GetRecipientConfigurationsResponse : ServiceResponse { public List<RecipientConfiguration> Configurations = new List<RecipientConfiguration>(); }
-    public class GetEventInstancesResponse : ServiceResponse { public List<EventTrigger> Instances = new List<EventTrigger>(); }
-
+    public class GetEventInstancesResponse : ServiceResponse { public List<EventTrigger> EventInstances = new List<EventTrigger>(); }
     public class GetScheduledEventsResponse : ServiceResponse { public List<ScheduledEvent> ScheduledEvents = new List<ScheduledEvent>();  }
+
+    public class GetTemplatesAndEventInstancesResponse : ServiceResponse
+    {
+        public Dictionary<string, RecipientTemplate> RecipientTemplates = new Dictionary<string, RecipientTemplate>();
+        public Dictionary<string, ActionTemplate> ActionTemplates = new Dictionary<string, ActionTemplate>();
+        public Dictionary<string, EventTrigger> EventInstances = new Dictionary<string, EventTrigger>();
+
+        public void AddRecipientTemplates(IEnumerable<RecipientTemplate> Templates)
+        {
+            foreach (RecipientTemplate rt in Templates)
+                if (!this.RecipientTemplates.ContainsKey(rt.TemplateToken))
+                    this.RecipientTemplates.Add(rt.TemplateToken, rt);
+        }
+        public void AddActionTemplates(IEnumerable<ActionTemplate> Templates)
+        {
+            foreach (ActionTemplate at in Templates)
+                if (!this.ActionTemplates.ContainsKey(at.TemplateToken))
+                    this.ActionTemplates.Add(at.TemplateToken, at);
+        }
+        public void AddEventInstances(IEnumerable<EventTrigger> Events)
+        {
+            foreach(EventTrigger et in Events)
+                if(!this.EventInstances.ContainsKey(et.TopicExpression))
+                    this.EventInstances.Add(et.TopicExpression, et);
+        }
+
+        public void resolveRecipientTemplates()
+        {
+            //foreach(ActionTemplate at in ActionTemplates)
+            //    if(!string.IsNullOrEmpty(at.RecipientTemplate))
+            //        at.recipientTemplateObj = RecipientTemplates.Single(x => x.TemplateToken == at.RecipientTemplate);
+        }
+    }
 }

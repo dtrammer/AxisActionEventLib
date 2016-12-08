@@ -15,14 +15,30 @@ namespace ActionEventLib.action
     {
         public int RuleID = 0;
         public string Name;
-        public bool Enabled;
+        public bool Enabled = true;
 
-        public string ActivationTimeOut = "PT0S";
+        private int _activationTimeOut = 0;
+        public string ActivationTimeOut { get { return "PT" + _activationTimeOut + "S"; } private set { } }
 
-        public EventTrigger Trigger;
-        public List<EventTrigger> TriggerConditions = new List<EventTrigger>();
+        public EventTrigger Trigger; //StartEvent
+        private List<EventTrigger> TriggerConditions = new List<EventTrigger>(); //ExtraConditions
+        public ActionConfiguration Configuration = new ActionConfiguration();
 
-        public ActionConfiguration Configuration;
+        public void AddExtraCondition(EventTrigger ExtraCondition)
+        {
+            if (!ExtraCondition.isProperty)
+                throw new Exception("SimpleEventInstanceException : A simple event instance (That is not a PropertyState) can't be used as an extra condition");
+
+            this.TriggerConditions.Add(ExtraCondition);
+        }
+        public void RemoveExtraCondition(EventTrigger ExtraCondition)
+        {
+            this.TriggerConditions.Remove(ExtraCondition);
+        }
+        public void SetActivationTimeout(int Seconds)
+        {
+            this._activationTimeOut = Seconds;
+        }
 
         public override string ToString()
         {

@@ -2,10 +2,12 @@
 using ActionEventLib.events;
 using ActionEventLib.templates;
 using ActionEventLib.types;
+using AxisActionEventLib.types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -24,6 +26,7 @@ namespace ActionEventLib.action
 
         /// <summary>
         /// Method to create a new Recipient Configuration on a device
+        /// If success the ID field of the passed Recipient Configuration instance will be set with the ID returned in the response
         /// </summary>
         /// <param name="IP">The device ip address</param>
         /// <param name="User">User to authenticate the http request</param>
@@ -35,17 +38,27 @@ namespace ActionEventLib.action
         }
 
         /// <summary>
-        /// Method to create a new action configuration
+        /// Method to create a new action configuration, an actionconfiguration is needed for creating an actionRule (event) on the device
+        /// If success the ID field of the passed ActionConfiguration instance will be set with the ID returned in the response
         /// </summary>
         /// <param name="IP">The device ip address</param>
         /// <param name="User">User to authenticate the http request</param>
         /// <param name="Password">Password to use</param>
-        /// <param name="Configuration">ActionConfiguration Object</param>
+        /// <param name="Configuration">ActionConfiguration reference</param>
         /// <returns>Returns the ID of the configuration stored on the device</returns>
         public async Task<ServiceResponse> AddActionConfiguration(string IP, string User, string Password, ActionConfiguration Configuration ) {
             return parseAddActionConfigResponse(await base.sendRequestAsync(IP, User,  Password, @"<act:AddActionConfiguration><act:NewActionConfiguration>" + Configuration.ToString() + "</act:NewActionConfiguration></act:AddActionConfiguration>"), Configuration);
         }
 
+        /// <summary>
+        /// Method to create a new ActionRule (Event) on the device. 
+        /// If success the ID field of the passed ActionRule instance will be set with the ID returned in the response
+        /// </summary>
+        /// <param name="IP">The device ip address</param>
+        /// <param name="User">User to authenticate the http request</param>
+        /// <param name="Password">Password to use</param>
+        /// <param name="NewRule">ActionRule reference</param>
+        /// <returns></returns>
         public async Task<ServiceResponse> AddActionRule(string IP, string User, string Password, ActionRule NewRule)
         {
             string actionBody = @"<act:AddActionRule><act:NewActionRule>"
@@ -54,7 +67,6 @@ namespace ActionEventLib.action
 
             return this.parseAddActionRuleResponse(await base.sendRequestAsync( IP,  User,  Password, actionBody),NewRule);
         }
-
 
         /// <summary>
         /// Method to retrieve the supported Actions templates of a device
@@ -152,78 +164,82 @@ namespace ActionEventLib.action
         #region XML parsing
         private ServiceResponse parseAddActionConfigResponse(ServiceResponse Response, ActionConfiguration Configuration)
         {
-            try
-            {
-                XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "AddActionConfigurationResponse");
-                Response.Content = configResponse.Element(NS_ACTION + "ConfigurationID").Value;
-                Configuration.ConfigurationID = int.Parse(Response.Content);
-            }
-            catch (Exception ex)
-            {
-                Response.IsSuccess = false;
-                Response.Content = "[ParseAddActionConfigResponse] " + ex.Message;
-            }
+            if (Response.IsSuccess)
+                try
+                {
+                    XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "AddActionConfigurationResponse");
+                    Response.Content = configResponse.Element(NS_ACTION + "ConfigurationID").Value;
+                    Configuration.ConfigurationID = int.Parse(Response.Content);
+                }
+                catch (Exception ex)
+                {
+                    Response.IsSuccess = false;
+                    Response.Content = "[ParseAddActionConfigResponse] " + ex.Message;
+                }
 
             return Response;
         }
         private ServiceResponse parseAddRecipientConfigResponse(ServiceResponse Response, RecipientConfiguration Configuration)
         {
-            try
-            {
-                Response.Content = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "AddRecipientConfigurationResponse").Element(NS_ACTION + "ConfigurationID").Value;
-                Configuration.ConfigurationID = int.Parse(Response.Content);
-            }
-            catch (Exception ex)
-            {
-                Response.IsSuccess = false;
-                Response.Content = "[ParseAddRecipientConfigResponse] " + ex.Message;
-            }
+            if (Response.IsSuccess)
+                try
+                {
+                    Response.Content = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "AddRecipientConfigurationResponse").Element(NS_ACTION + "ConfigurationID").Value;
+                    Configuration.ConfigurationID = int.Parse(Response.Content);
+                }
+                catch (Exception ex)
+                {
+                    Response.IsSuccess = false;
+                    Response.Content = "[ParseAddRecipientConfigResponse] " + ex.Message;
+                }
 
             return Response;
         }
         private ServiceResponse parseAddActionRuleResponse(ServiceResponse Response , ActionRule newRule)
         {
-            try
-            {
-                Response.Content = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "AddActionRuleResponse").Element(NS_ACTION + "RuleID").Value;
-                newRule.RuleID = int.Parse(Response.Content);
-            }
-            catch (Exception ex)
-            {
-                Response.IsSuccess = false;
-                Response.Content = "[parseAddActionRuleResponse] " + ex.Message;
-            }
+            if (Response.IsSuccess)
+                try
+                {
+                    Response.Content = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "AddActionRuleResponse").Element(NS_ACTION + "RuleID").Value;
+                    newRule.RuleID = int.Parse(Response.Content);
+                }
+                catch (Exception ex)
+                {
+                    Response.IsSuccess = false;
+                    Response.Content = "[parseAddActionRuleResponse] " + ex.Message;
+                }
 
             return Response;
         }
         private GetActionTemplatesResponse parseGetActionTemplatesResponse(ServiceResponse Response)
         {
             GetActionTemplatesResponse response = Response.Factory<GetActionTemplatesResponse>();
-            try
-            {
-                XElement templates = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionTemplatesResponse").Element(NS_ACTION + "ActionTemplates");
-                ActionTemplate newTemplate;
-
-                foreach (XElement el in templates.Elements())
+            if (Response.IsSuccess)
+                try
                 {
-                    newTemplate = new ActionTemplate();
+                    XElement templates = response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionTemplatesResponse").Element(NS_ACTION + "ActionTemplates");
+                    ActionTemplate newTemplate;
 
-                    newTemplate.TemplateToken = el.Element(NS_ACTION + "TemplateToken").Value;
+                    foreach (XElement el in templates.Elements())
+                    {
+                        newTemplate = new ActionTemplate();
 
-                    if (el.Element(NS_ACTION + "RecipientTemplate") != null)
-                        newTemplate.RecipientTemplate = el.Element(NS_ACTION + "RecipientTemplate").Value;
+                        newTemplate.TemplateToken = el.Element(NS_ACTION + "TemplateToken").Value;
 
-                    foreach (XElement param in el.Element(NS_ACTION + "Parameters").Elements())
-                        newTemplate.Parameters.Add(param.Attribute("Name").Value, string.Empty);
+                        if (el.Element(NS_ACTION + "RecipientTemplate") != null)
+                            newTemplate.RecipientTemplate = el.Element(NS_ACTION + "RecipientTemplate").Value;
 
-                    response.Templates.Add(newTemplate);
+                        foreach (XElement param in el.Element(NS_ACTION + "Parameters").Elements())
+                            newTemplate.Parameters.Add(param.Attribute("Name").Value, string.Empty);
+
+                        response.Templates.Add(newTemplate);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Content = "[ParseActionTemplatesResponse] " + ex.Message;
-            }
+                catch (Exception ex)
+                {
+                    response.IsSuccess = false;
+                    response.Content = "[ParseActionTemplatesResponse] " + ex.Message;
+                }
 
             return response;
 
@@ -231,151 +247,143 @@ namespace ActionEventLib.action
         private GetRecipientTemplatesResponse parseGetRecipientTemplatesResponse(ServiceResponse Response)
         {
             GetRecipientTemplatesResponse response = Response.Factory<GetRecipientTemplatesResponse>();
-
-            try
-            {
-                XElement templates = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetRecipientTemplatesResponse").Element(NS_ACTION + "RecipientTemplates");
-                RecipientTemplate newTemplate;
-
-                foreach (XElement el in templates.Elements())
+            if (Response.IsSuccess)
+                try
                 {
-                    newTemplate = new RecipientTemplate();
+                    XElement templates = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetRecipientTemplatesResponse").Element(NS_ACTION + "RecipientTemplates");
+                    RecipientTemplate newTemplate;
 
-                    newTemplate.TemplateToken = el.Element(NS_ACTION + "TemplateToken").Value;
+                    foreach (XElement el in templates.Elements())
+                    {
+                        newTemplate = new RecipientTemplate();
 
-                    foreach (XElement param in el.Element(NS_ACTION + "Parameters").Elements())
-                        newTemplate.Parameters.Add(param.Attribute("Name").Value, string.Empty);
+                        newTemplate.TemplateToken = el.Element(NS_ACTION + "TemplateToken").Value;
 
-                    response.Templates.Add(newTemplate);
+                        foreach (XElement param in el.Element(NS_ACTION + "Parameters").Elements())
+                            newTemplate.Parameters.Add(param.Attribute("Name").Value, string.Empty);
+
+                        response.Templates.Add(newTemplate);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Content = "[ParseRecipientTemplatesResponse] " + ex.Message;
-            }
+                catch (Exception ex)
+                {
+                    response.IsSuccess = false;
+                    response.Content = "[ParseRecipientTemplatesResponse] " + ex.Message;
+                }
 
             return response;
         }
         private GetActionConfigurationsResponse parseGetActionConfigResponse(ServiceResponse Response)
         {
             GetActionConfigurationsResponse response = Response.Factory<GetActionConfigurationsResponse>();
-            try
-            {
-                XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionConfigurationsResponse").Element(NS_ACTION + "ActionConfigurations");
-
-                ActionConfiguration conf;
-
-                foreach (XElement el in configResponse.Elements())
+            if (Response.IsSuccess)
+                try
                 {
-                    conf = new ActionConfiguration();
-                    conf.ConfigurationID = int.Parse(el.Element(NS_ACTION + "ConfigurationID").Value);
-                    conf.Name = el.Element(NS_ACTION + "Name").Value;
-                    conf.actionTemplate = new ActionTemplate() { TemplateToken = el.Element(NS_ACTION + "TemplateToken").Value };
+                    XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionConfigurationsResponse").Element(NS_ACTION + "ActionConfigurations");
 
-                    foreach (XElement element in el.Element(NS_ACTION + "Parameters").Elements())
-                        conf.actionTemplate.Parameters.Add(element.Attribute("Name").Value, element.Attribute("Value").Value);
+                    ActionConfiguration conf;
 
-                    response.Configurations.Add(conf);
+                    foreach (XElement el in configResponse.Elements())
+                    {
+                        conf = new ActionConfiguration();
+                        conf.ConfigurationID = int.Parse(el.Element(NS_ACTION + "ConfigurationID").Value);
+                        conf.Name = el.Element(NS_ACTION + "Name").Value;
+                        conf.actionTemplate = new ActionTemplate() { TemplateToken = el.Element(NS_ACTION + "TemplateToken").Value };
+
+                        foreach (XElement element in el.Element(NS_ACTION + "Parameters").Elements())
+                            conf.actionTemplate.Parameters.Add(element.Attribute("Name").Value, element.Attribute("Value").Value);
+
+                        response.Configurations.Add(conf);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Content = "[ParseActionConfigResponse] " + ex.Message;
-            }
+                catch (Exception ex)
+                {
+                    response.IsSuccess = false;
+                    response.Content = "[ParseActionConfigResponse] " + ex.Message;
+                }
 
             return response;
         }
         private GetActionRulesResponse parseGetActionRulesResponse(ServiceResponse Response)
         {
             GetActionRulesResponse response = Response.Factory<GetActionRulesResponse>();
-            try
-            {
-                XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionRulesResponse").Element(NS_ACTION + "ActionRules");
-                ActionRule rule;
-                string topicExpression;
-
-                foreach (XElement el in configResponse.Elements())
+            if (Response.IsSuccess)
+                try
                 {
-                    rule = new ActionRule();
-                    //Parse
-                    rule.RuleID = int.Parse(el.Element(NS_ACTION + "RuleID").Value);
-                    rule.Name = el.Element(NS_ACTION + "Name").Value;
-                    rule.Enabled = bool.Parse(el.Element(NS_ACTION + "Enabled").Value);
-
-                    if (el.Element(NS_ACTION + "StartEvent") != null)
+                    XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetActionRulesResponse").Element(NS_ACTION + "ActionRules");
+                    ActionRule rule;
+                    foreach (XElement el in configResponse.Elements())
                     {
-                        rule.Trigger = new EventTrigger();
-                        topicExpression = el.Element(NS_ACTION + "StartEvent").Element(NS_TOPIC + "TopicExpression").Value;
-                        if (el.Element(NS_ACTION + "StartEvent").Element(NS_TOPIC + "MessageContent") != null)
-                            rule.Trigger.setExtTopic(topicExpression, el.Element(NS_ACTION + "StartEvent").Element(NS_TOPIC + "MessageContent").Value);
-                        else
-                            rule.Trigger.setSimpleTopic(topicExpression);
+                        rule = new ActionRule();
+                        //parse rule base info
+                        rule.RuleID = int.Parse(el.Element(NS_ACTION + "RuleID").Value);
+                        rule.Name = el.Element(NS_ACTION + "Name").Value;
+                        rule.Enabled = bool.Parse(el.Element(NS_ACTION + "Enabled").Value);
+                        //parse rule startevent
+                        if (el.HasElement(NS_ACTION + "StartEvent"))
+                            rule.Trigger = new EventTrigger(
+                                el.Element(NS_ACTION + "StartEvent").Element(NS_TOPIC + "TopicExpression").Value, false ,
+                                el.Element(NS_ACTION + "StartEvent").GetElementValue(NS_TOPIC + "MessageContent")
+                            );
+                        //parse rule conditions
+                        if (el.HasElement(NS_ACTION + "Conditions"))
+                            foreach (XElement condition in el.Element(NS_ACTION + "Conditions").Elements())
+                            {
+                                rule.AddExtraCondition(
+                                    new EventTrigger(
+                                        condition.Element(NS_TOPIC + "TopicExpression").Value, false,
+                                        condition.GetElementValue(NS_TOPIC + "MessageContent")
+                                    )
+                                );
+                            }
+                        //parse rule actionconfiguration id
+                        rule.Configuration = new ActionConfiguration() { ConfigurationID = int.Parse(el.Element(NS_ACTION + "PrimaryAction").Value) };
+                        //parse activation timout
+                        if (el.HasElement(NS_ACTION + "ActivationTimeout"))
+                            rule.SetActivationTimeout(int.Parse(Regex.Match(el.Element(NS_ACTION + "ActivationTimeout").Value, @"\d+").Value));
+
+                        response.ActionRules.Add(rule);
                     }
-
-                    if (el.Element(NS_ACTION + "Conditions") != null)
-                    {
-                        EventTrigger newTrigger = new EventTrigger();
-                        foreach (XElement condition in el.Element(NS_ACTION + "Conditions").Elements())
-                        {
-                            newTrigger = new EventTrigger();
-                            topicExpression = condition.Element(NS_TOPIC + "TopicExpression").Value;
-                            if (condition.Element(NS_TOPIC + "MessageContent") != null)
-                                newTrigger.setExtTopic(topicExpression, condition.Element(NS_TOPIC + "MessageContent").Value, true);
-                            else
-                                newTrigger.setSimpleTopic(topicExpression, true);
-
-                            rule.TriggerConditions.Add(newTrigger);
-                        }
-
-                    }
-
-                    int ActionConfID = int.Parse(el.Element(NS_ACTION + "PrimaryAction").Value);
-
-                    rule.Configuration = new ActionConfiguration() { ConfigurationID = ActionConfID };
-
-                    response.ActionRules.Add(rule);
                 }
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Content = "[ParseActionRulesResponse] " + ex.Message;
-            }
+                catch (Exception ex)
+                {
+                    response.IsSuccess = false;
+                    response.Content = "[ParseActionRulesResponse] " + ex.Message;
+                }
 
             return response;
         }
         private GetRecipientConfigurationsResponse parseGetRecipientConfigurations(ServiceResponse Response)
         {
             GetRecipientConfigurationsResponse response = Response.Factory<GetRecipientConfigurationsResponse>();
-            try
-            {
-                XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetRecipientConfigurationsResponse").Element(NS_ACTION + "RecipientConfigurations");
-                RecipientConfiguration recipient;
-
-                foreach (XElement el in configResponse.Elements())
+            if (Response.IsSuccess)
+                try
                 {
-                    recipient = new RecipientConfiguration();
-                    recipient.ConfigurationID = int.Parse(el.Element(NS_ACTION + "ConfigurationID").Value);
-                    recipient.TemplateToken = el.Element(NS_ACTION + "TemplateToken").Value;
-                    recipient.Name = el.Element(NS_ACTION + "Name").Value;
+                    XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "GetRecipientConfigurationsResponse").Element(NS_ACTION + "RecipientConfigurations");
+                    RecipientConfiguration recipient;
 
-                    foreach (XElement element in el.Element(NS_ACTION + "Parameters").Elements())
+                    foreach (XElement el in configResponse.Elements())
                     {
-                        recipient.Parameters.Add(
-                            element.Attribute("Name").Value, element.Attribute("Value").Value
-                            );
-                    }
+                        recipient = new RecipientConfiguration();
+                        recipient.ConfigurationID = int.Parse(el.Element(NS_ACTION + "ConfigurationID").Value);
+                        recipient.TemplateToken = el.Element(NS_ACTION + "TemplateToken").Value;
+                        recipient.Name = el.Element(NS_ACTION + "Name").Value;
 
-                    response.Configurations.Add(recipient);
+                        foreach (XElement element in el.Element(NS_ACTION + "Parameters").Elements())
+                        {
+                            recipient.Parameters.Add(
+                                element.Attribute("Name").Value, element.Attribute("Value").Value
+                                );
+                        }
+
+                        response.Configurations.Add(recipient);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                Response.IsSuccess = false;
-                Response.Content = "[ParseRecipientConfigurations] " + ex.Message;
-            }
+                catch (Exception ex)
+                {
+                    Response.IsSuccess = false;
+                    Response.Content = "[ParseRecipientConfigurations] " + ex.Message;
+                }
 
             return response;
         }

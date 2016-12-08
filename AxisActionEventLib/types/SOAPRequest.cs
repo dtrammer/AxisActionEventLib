@@ -28,8 +28,9 @@ namespace ActionEventLib.types
         protected const string NS_TNS1 = @"{http://www.onvif.org/ver10/topics}";
         protected const string NS_TNSAXIS = @"{http://www.axis.com/2009/event/topics}";
         #endregion
-        
-        protected string _message_base = "<soap:Envelope xmlns:soap=\"" + NS_SOAP_ENV.Substring(1 , NS_SOAP_ENV.Length - 2)
+
+        #region members vars
+        private string _message_base = "<soap:Envelope xmlns:soap=\"" + NS_SOAP_ENV.Substring(1 , NS_SOAP_ENV.Length - 2)
                                                     + "\" xmlns:act=\"" + NS_ACTION.Substring(1, NS_ACTION.Length - 2) + "\" xmlns:even=\"" + NS_EVENT.Substring(1, NS_EVENT.Length - 2) + "\" xmlns:wsnt=\"" + NS_TOPIC.Substring(1, NS_TOPIC.Length - 2)
                                                     + "\" xmlns:tns1=\"" + NS_TNS1.Substring(1, NS_TNS1.Length - 2) + "\" xmlns:tt=\"" + NS_ONVIF.Substring(1, NS_ONVIF.Length - 2) + "\" xmlns:tnsaxis=\"" + NS_TNSAXIS.Substring(1, NS_TNSAXIS.Length - 2) + "\" >"
                                                     + @"<soap:Body>{0}</soap:Body>"
@@ -37,6 +38,10 @@ namespace ActionEventLib.types
 
         private string _service_url = "http://{0}/vapix/services";
         public string Service_URL {  get { return _service_url; } set { _service_url = value; } }
+
+        private double _request_timeout = 25;
+        public double Request_Timeout {  get { return _request_timeout; } set { _request_timeout = value; } }
+        #endregion
 
         protected async Task<ServiceResponse> sendRequestAsync(string IP, string User , string Password, string Action) {
 
@@ -48,7 +53,7 @@ namespace ActionEventLib.types
                     ).GetCredential(new Uri(@"http://localhost"), "Digest")
             }, true))
             {
-                httpClient.Timeout = TimeSpan.FromSeconds(25);
+                httpClient.Timeout = TimeSpan.FromSeconds(_request_timeout);
                 ServiceResponse serviceResponse = new ServiceResponse();
 
                 try
@@ -57,36 +62,30 @@ namespace ActionEventLib.types
                     {
                         request.Content = new StringContent(string.Format(_message_base, Action));
 
-                        //DEBUG
-                        Console.WriteLine("REQUEST CONTENT : " + await request.Content.ReadAsStringAsync());
-                        //END DEBUG
-
                         HttpResponseMessage Response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
 
-                        if (Response.IsSuccessStatusCode)
-                        {
+                        serviceResponse.IsSuccess = Response.IsSuccessStatusCode;
+                        serviceResponse.HttpStatusCode = Response.StatusCode;
 
-                            serviceResponse.IsSuccess = true; serviceResponse.HttpStatusCode = Response.StatusCode;
+                        if (serviceResponse.IsSuccess)
                             serviceResponse.SOAPContent = XElement.Parse(await Response.Content.ReadAsStringAsync());
-                        }
                         else
-                        {
-                            Console.WriteLine("FAULT RESPONSE CONTENT : " + await Response.Content.ReadAsStringAsync());
-                            serviceResponse.IsSuccess = false;
                             serviceResponse.Content = await Response.Content.ReadAsStringAsync();
-                            serviceResponse.HttpStatusCode = Response.StatusCode;
-                        }
-
                     }
-                }catch(Exception ex)
+                }
+                catch (System.Threading.Tasks.TaskCanceledException)
                 {
                     serviceResponse.IsSuccess = false;
-                    serviceResponse.Content = "[SendSOAPRequest] " + ex.Message;
+                    serviceResponse.Content = "[SendSOAPRequest] Request timed out";
+                }
+                catch (Exception ex)
+                {
+                    serviceResponse.IsSuccess = false;
+                    serviceResponse.Content = "[SendSOAPRequest] " + ex.Message + (ex.InnerException != null ? " " + ex.InnerException.Message : "");
                 }
 
                 return serviceResponse;
             }
         }
-
     }
 }

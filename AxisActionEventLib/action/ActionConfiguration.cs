@@ -10,8 +10,8 @@ namespace ActionEventLib.action
 {
     public class ActionConfiguration
     {
-        public int ConfigurationID = 0;
-        public string Name;
+        public int ConfigurationID { get; set; }
+        public string Name { get; set; }
         public ActionTemplate actionTemplate;
 
         public override string ToString() {
