@@ -20,28 +20,33 @@ namespace ActionEventLibTests
         string WRONG_IP = "192.168.1.67777";
         string WRONG_USERPASS = "rooooot";
 
-
         #region ActionService
 
-        ActionService m_aService = new ActionService();
-        ActionRule m_actionRule;
-        int VALID_ACTIONCONFIG_ID = 1;
+        ActionService actionService = new ActionService();
+        ActionRule newActionRule;
+        int VALID_ACTIONCONFIG_ID = 2;
 
         #region Action Templates
         [TestMethod]
         public async Task Get_ActionTemplates()
         {
-            GetActionTemplatesResponse response = await m_aService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
+            GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
 
             foreach (ActionTemplate t in response.Templates)
+            {
                 Console.WriteLine("New template : " + t.ToString());
-
+                Console.WriteLine("\t" + "Recipient : " + t.RecipientTemplate);
+                Console.WriteLine("\t" + "Ref token : " + (t.recipientTemplateObj != null ? t.recipientTemplateObj.TemplateToken : "Null"));
+                Console.WriteLine("Template parameters:");
+                foreach (string s in t.Get_Parameters())
+                    Console.WriteLine("\t" + s);
+            }
             Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && !response.SOAPContent.IsEmpty && response.Templates.Count > 0);
         }
         [TestMethod]
         public async Task Get_ActionTemplatesWithWrongIP_ResponseReturnsFalseAndExplicitExceptionMessage()
         {
-            GetActionTemplatesResponse response = await m_aService.GetActionTemplatesAsync(WRONG_IP, VALID_USER, VALID_PASS);
+            GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync(WRONG_IP, VALID_USER, VALID_PASS);
 
             Console.WriteLine("Response IsSuccess : " + response.IsSuccess + " : Message : " + response.Content);
 
@@ -50,7 +55,7 @@ namespace ActionEventLibTests
         [TestMethod]
         public async Task Get_ActionTemplatesWithWrongUserPass_ResponseReturnsFalseAndExceptionMessage()
         {
-            GetActionTemplatesResponse response = await m_aService.GetActionTemplatesAsync(VALID_IP, WRONG_USERPASS, WRONG_USERPASS);
+            GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync(VALID_IP, WRONG_USERPASS, WRONG_USERPASS);
 
             Console.WriteLine("Response IsSuccess : " + response.IsSuccess + " : Message : " + response.Content);
 
@@ -62,13 +67,16 @@ namespace ActionEventLibTests
     [TestMethod]
         public async Task Get_ActionRules()
         {
-            GetActionRulesResponse response = await m_aService.GetActionRules(VALID_IP, VALID_USER, VALID_PASS);
+            GetActionRulesResponse response = await actionService.GetActionRules(VALID_IP, VALID_USER, VALID_PASS);
 
-            if(!response.IsSuccess)
+            if (!response.IsSuccess)
                 Console.WriteLine("NOT 200 OK : " + response.Content);
             else
-                foreach(ActionRule ar in response.ActionRules)
+                foreach (ActionRule ar in response.ActionRules)
+                {
                     Console.WriteLine(ar.ToString());
+                    Console.WriteLine(ar.Configuration.ToString());
+                }
 
             Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && !response.SOAPContent.IsEmpty);
         }
@@ -76,22 +84,22 @@ namespace ActionEventLibTests
         [TestMethod]
         public async Task Add_ActionRuleWithValidParams_IsSuccessAndReturnsRuleID()
         {
-            m_actionRule = new ActionRule()
+            newActionRule = new ActionRule()
             {
                 Name = "UnitTestRule",
                 Enabled = true,
                 Trigger = new EventTrigger("tns1:VideoSource/tnsaxis:LiveStreamAccessed", true, "boolean(//SimpleItem[@Name=\"accessed\" and @Value=\"1\"]"),
-                Configuration = new ActionConfiguration() { ConfigurationID = VALID_ACTIONCONFIG_ID }
+                Configuration = new ActionConfiguration() { ConfigID = VALID_ACTIONCONFIG_ID }
             };
 
-            ServiceResponse response = await m_aService.AddActionRule(VALID_IP, VALID_USER, VALID_PASS , m_actionRule);
+            ServiceResponse response = await actionService.AddActionRule(VALID_IP, VALID_USER, VALID_PASS , newActionRule);
 
             if (!response.IsSuccess)
                 Console.WriteLine("Error : " + response.Content);
             else
-                Console.WriteLine("New action rule id : " + m_actionRule.RuleID);
+                Console.WriteLine("New action rule id : " + newActionRule.RuleID);
 
-            Assert.IsTrue(response.IsSuccess && !response.SOAPContent.IsEmpty && m_actionRule.RuleID != 0);
+            Assert.IsTrue(response.IsSuccess && !response.SOAPContent.IsEmpty && newActionRule.RuleID != 0);
         }
 
         /// <summary>
@@ -102,16 +110,16 @@ namespace ActionEventLibTests
         [TestMethod]
         public async Task Add_ActionRuleWithInvalidParams()
         {
-            m_actionRule = new ActionRule()
+            newActionRule = new ActionRule()
             {
                 Name = "MyBadRule",
                 Enabled = true,
-                Configuration = new ActionConfiguration() { ConfigurationID = VALID_ACTIONCONFIG_ID },
+                Configuration = new ActionConfiguration() { ConfigID = VALID_ACTIONCONFIG_ID },
                 Trigger = new EventTrigger("tns1:VideoSource/tnsaxis:LiveStreamAccessed", true, "boolean(//SimpleItem[@Name=\"accessed\" and @Value=\"1\"]")
             }; 
 
 
-            ServiceResponse response = await m_aService.AddActionRule(VALID_IP, VALID_USER, VALID_PASS, m_actionRule);
+            ServiceResponse response = await actionService.AddActionRule(VALID_IP, VALID_USER, VALID_PASS, newActionRule);
 
             Console.WriteLine("[AddActionRuleWithInvalidParams] Rule ID : " + response.Content);
 
@@ -123,10 +131,10 @@ namespace ActionEventLibTests
         [TestMethod]
             public async Task Get_ActionConfigurations()
             {
-                GetActionConfigurationsResponse response = await m_aService.GetActionConfigurations(VALID_IP, VALID_USER, VALID_PASS);
+                GetActionConfigurationsResponse response = await actionService.GetActionConfigurations(VALID_IP, VALID_USER, VALID_PASS);
 
                 if (response.IsSuccess)
-                    foreach(ActionConfiguration ac in response.Configurations)
+                    foreach (ActionConfiguration ac in response.Configurations)
                         Console.WriteLine(ac.ToString());
 
                 Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && !response.SOAPContent.IsEmpty);
@@ -134,7 +142,7 @@ namespace ActionEventLibTests
             [TestMethod]
             public async Task Get_ActionConfigurationsWithWrongCredentials_IsUnauthorized()
             {
-                GetActionConfigurationsResponse response = await m_aService.GetActionConfigurations(VALID_IP, "root2", VALID_PASS);
+                GetActionConfigurationsResponse response = await actionService.GetActionConfigurations(VALID_IP, "root2", VALID_PASS);
 
                 Assert.IsTrue(response.HttpStatusCode == System.Net.HttpStatusCode.Unauthorized);
             }
@@ -146,33 +154,36 @@ namespace ActionEventLibTests
                 m_actionConfiguration = new ActionConfiguration()
                 {
                     Name = "UnitTestConfig",
-                    actionTemplate = new ActionTemplate() { TemplateToken = "com.axis.action.fixed.notification.http" }
+                    TemplateToken = "com.axis.action.fixed.notification.http" 
                 };
 
                 //Action Template params
-                m_actionConfiguration.actionTemplate.Parameters.Add("parameters", "action=list");
-                m_actionConfiguration.actionTemplate.Parameters.Add("message", "Hello world!");
+                m_actionConfiguration.Parameters.Add("parameters", "action=list");
+                m_actionConfiguration.Parameters.Add("message", "Hello world!");
                 //Recipient Template params
-                m_actionConfiguration.actionTemplate.Parameters.Add("upload_url", "http://10.21.66.24");
-                m_actionConfiguration.actionTemplate.Parameters.Add("login", "root");
-                m_actionConfiguration.actionTemplate.Parameters.Add("password", "pass");
-                m_actionConfiguration.actionTemplate.Parameters.Add("proxy_host", "");
-                m_actionConfiguration.actionTemplate.Parameters.Add("proxy_port", "");
-                m_actionConfiguration.actionTemplate.Parameters.Add("proxy_login", "");
-                m_actionConfiguration.actionTemplate.Parameters.Add("proxy_password", "");
-                m_actionConfiguration.actionTemplate.Parameters.Add("qos", "");
+                m_actionConfiguration.Parameters.Add("upload_url", "http://10.21.66.24");
+                m_actionConfiguration.Parameters.Add("login", "root");
+                m_actionConfiguration.Parameters.Add("password", "pass");
+                m_actionConfiguration.Parameters.Add("proxy_host", "");
+                m_actionConfiguration.Parameters.Add("proxy_port", "");
+                m_actionConfiguration.Parameters.Add("proxy_login", "");
+                m_actionConfiguration.Parameters.Add("proxy_password", "");
+                m_actionConfiguration.Parameters.Add("qos", "");
 
-                ServiceResponse response = await m_aService.AddActionConfiguration(VALID_IP , VALID_USER , VALID_PASS , m_actionConfiguration);
+                ServiceResponse response = await actionService.AddActionConfiguration(VALID_IP , VALID_USER , VALID_PASS , m_actionConfiguration);
 
-                Console.WriteLine("[AddActionConfigurations] " + m_actionConfiguration.ConfigurationID);
+                Console.WriteLine("[AddActionConfigurations] " + m_actionConfiguration.ConfigID);
 
-                Assert.IsTrue(response.IsSuccess && m_actionConfiguration.ConfigurationID != 0);
+                Assert.IsTrue(response.IsSuccess && m_actionConfiguration.ConfigID != 0);
             }
 
             [TestMethod]
             public async Task Remove_ActionConfigurations()
             {
-                ServiceResponse response = await m_aService.RemoveActionConfiguration(VALID_IP, VALID_USER, VALID_PASS, VALID_ACTIONCONFIG_ID);
+                ServiceResponse response = await actionService.RemoveActionConfiguration(VALID_IP, VALID_USER, VALID_PASS, VALID_ACTIONCONFIG_ID);
+                Console.WriteLine(response.Content);
+                if (response.SOAPContent != null)
+                    Console.WriteLine(response.SOAPContent);
                 Assert.IsTrue(response.IsSuccess && Regex.IsMatch((response.SOAPContent != null ? response.SOAPContent.ToString() : ""), "RemoveActionConfigurationResponse"));
             }
         #endregion
@@ -181,14 +192,14 @@ namespace ActionEventLibTests
         [TestMethod]
         public async Task Get_RecipientTemplates()
         {
-            GetRecipientTemplatesResponse response = await m_aService.GetRecipientTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
+            GetRecipientTemplatesResponse response = await actionService.GetRecipientTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
 
             Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && !response.SOAPContent.IsEmpty && response.Templates.Count > 0);
         }
         [TestMethod]
         public async Task Get_RecipientConfig()
         {
-            GetRecipientConfigurationsResponse response = await m_aService.GetRecipientConfigurations(VALID_IP, VALID_USER, VALID_PASS);
+            GetRecipientConfigurationsResponse response = await actionService.GetRecipientConfigurations(VALID_IP, VALID_USER, VALID_PASS);
 
             Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && !response.SOAPContent.IsEmpty && response.Configurations != null);
         }
@@ -207,7 +218,7 @@ namespace ActionEventLibTests
             m_recipientConfig.Parameters.Add("port", "80");
             m_recipientConfig.Parameters.Add("qos", "");
 
-            ServiceResponse response = await m_aService.AddRecipientConfiguration(VALID_IP, VALID_USER, VALID_PASS, m_recipientConfig);
+            ServiceResponse response = await actionService.AddRecipientConfiguration(VALID_IP, VALID_USER, VALID_PASS, m_recipientConfig);
 
             Console.WriteLine("[AddRecipientConfigWithValidParams] " + m_recipientConfig.ConfigurationID);
 
@@ -217,7 +228,7 @@ namespace ActionEventLibTests
         [TestMethod]
         public async Task RemoveRecipientConfigWithValidParams_IsSuccessWithRemoveRecipientConfigurationResponse()
         {
-            ServiceResponse response = await m_aService.RemoveRecipientConfiguration(VALID_IP, VALID_USER, VALID_PASS,1);
+            ServiceResponse response = await actionService.RemoveRecipientConfiguration(VALID_IP, VALID_USER, VALID_PASS,1);
 
             Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && Regex.IsMatch(response.SOAPContent.ToString(), "RemoveRecipientConfigurationResponse"));
         }
@@ -227,11 +238,11 @@ namespace ActionEventLibTests
 
         #region EventService
 
-        EventService m_eService = new EventService();
+        EventService eventService = new EventService();
 
         [TestMethod]
         public async Task Get_EventInstances() {
-            GetEventInstancesResponse response = await m_eService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
+            GetEventInstancesResponse response = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
 
             foreach (EventTrigger e in response.EventInstances)
             {
@@ -258,7 +269,7 @@ namespace ActionEventLibTests
         [TestMethod]
         public async Task Get_Scheduled_Events()
         {
-            GetScheduledEventsResponse response = await m_eService.GetScheduledEventsAsync(VALID_IP, VALID_USER, VALID_PASS);
+            GetScheduledEventsResponse response = await eventService.GetScheduledEventsAsync(VALID_IP, VALID_USER, VALID_PASS);
 
             Console.WriteLine(response.HttpStatusCode + " - " + response.Content);
 
@@ -278,7 +289,7 @@ namespace ActionEventLibTests
                 Schedule = new ICalendar(new ScheduleTime(8), new ScheduleTime(23), new ScheduleDay[] { ScheduleDay.MO, ScheduleDay.TU, ScheduleDay.WE })
             };
 
-            ServiceResponse resp = await m_eService.Edit_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, "com.axis.schedules.after_hours", newEvent);
+            ServiceResponse resp = await eventService.Edit_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, "com.axis.schedules.after_hours", newEvent);
 
             Assert.IsTrue(resp.IsSuccess);
         }
@@ -291,7 +302,7 @@ namespace ActionEventLibTests
                 Schedule = new ICalendar(10, PulseInterval.MINUTELY)
             };
 
-            ServiceResponse response = await m_eService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS,se);
+            ServiceResponse response = await eventService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS,se);
 
             Console.WriteLine(response.Content);
 
@@ -308,7 +319,7 @@ namespace ActionEventLibTests
 
             Console.WriteLine(se.ToString());
 
-            ServiceResponse response = await m_eService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, se);
+            ServiceResponse response = await eventService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, se);
 
             Console.WriteLine(response.Content);
 
@@ -327,7 +338,7 @@ namespace ActionEventLibTests
 
             Console.WriteLine(se.ToString());
 
-            ServiceResponse response = await m_eService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, se);
+            ServiceResponse response = await eventService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, se);
 
             Console.WriteLine(response.Content);
 
@@ -345,7 +356,7 @@ namespace ActionEventLibTests
             };
 
            
-            ServiceResponse response = await m_eService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, se);
+            ServiceResponse response = await eventService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, se);
 
             Console.WriteLine(response.Content);
 
@@ -364,7 +375,7 @@ namespace ActionEventLibTests
 
             Console.WriteLine(se.ToString());
 
-            ServiceResponse response = await m_eService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, se);
+            ServiceResponse response = await eventService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, se);
 
             Console.WriteLine(response.Content);
 
@@ -374,7 +385,7 @@ namespace ActionEventLibTests
         [TestMethod]
         public async Task Change_VirtualInputStateAsync()
         {
-            ServiceResponse resp = await m_eService.Change_VirtualInputStateAsync(VALID_IP, VALID_USER, VALID_PASS, 4, true);
+            ServiceResponse resp = await eventService.Change_VirtualInputStateAsync(VALID_IP, VALID_USER, VALID_PASS, 4, true);
 
             Console.WriteLine(resp.Content);
 

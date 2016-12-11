@@ -11,7 +11,7 @@ namespace ActionEventLib.templates
     /// </summary>
     public class ActionTemplate
     {
-        private string _templateToken;
+        private string _templateToken = null;
         public string TemplateToken
         {
             get { return _templateToken; }
@@ -22,11 +22,21 @@ namespace ActionEventLib.templates
                 }
         }
 
-        public string RecipientTemplate;
-        public RecipientTemplate recipientTemplateObj;
+        public string RecipientTemplate = string.Empty;
+        public RecipientTemplate recipientTemplateObj = null;
         //All the parameters fields of the templates for Axis devices so far have string as datatype
         public Dictionary<string,string> Parameters = new Dictionary<string, string>();
         public bool IsUnlimited = false;
+
+        public List<string> Get_Parameters()
+        {
+            List<string> result = new List<string>();
+            foreach (KeyValuePair<string, string> kv in this.Parameters)
+                result.Add(kv.Key);
+            if (this.recipientTemplateObj != null)
+                result.AddRange(this.recipientTemplateObj.Get_Parameters());
+            return result;
+        }
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();

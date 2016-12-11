@@ -69,6 +69,38 @@ namespace ActionEventLib.action
         }
 
         /// <summary>
+        /// Method to update an existing actionconfiguration
+        /// </summary>
+        /// <param name="IP"></param>
+        /// <param name="User"></param>
+        /// <param name="Password"></param>
+        /// <param name="Config"></param>
+        /// <returns>ServiceResponse</returns>
+        public async Task<ServiceResponse> Update_ActionConfiguration(string IP , string User , string Password , ActionConfiguration Config)
+        {
+            ServiceResponse response = await this.RemoveActionConfiguration(IP, User, Password, Config.ConfigID);
+            if (response.IsSuccess)
+                response = await this.AddActionConfiguration(IP, User, Password, Config);
+            return response;
+        }
+
+        /// <summary>
+        /// Method to update an existing action rule
+        /// </summary>
+        /// <param name="IP"></param>
+        /// <param name="User"></param>
+        /// <param name="Password"></param>
+        /// <param name="Config"></param>
+        /// <returns>ServiceResponse</returns>
+        public async Task<ServiceResponse> Update_ActionRule(string IP, string User, string Password, ActionRule Rule)
+        {
+            ServiceResponse response = await this.RemoveActionRule(IP, User, Password, Rule.RuleID);
+            if (response.IsSuccess)
+                response = await this.AddActionRule(IP, User, Password, Rule);
+            return response;
+        }
+
+        /// <summary>
         /// Method to retrieve the supported Actions templates of a device
         /// </summary>
         /// <param name="IP">The device ip address</param>
@@ -77,7 +109,14 @@ namespace ActionEventLib.action
         /// <returns>The supported Action Templates of the device</returns>
         /// 
         public async Task<GetActionTemplatesResponse> GetActionTemplatesAsync(string IP , string User, string Password ) {
-            return parseGetActionTemplatesResponse(await base.sendRequestAsync(IP,  User,  Password , @"<act:GetActionTemplates />"));
+            GetRecipientTemplatesResponse recTempResp = await this.GetRecipientTemplatesAsync(IP, User, Password);
+            GetActionTemplatesResponse actTempResp = parseGetActionTemplatesResponse(await base.sendRequestAsync(IP,  User,  Password , @"<act:GetActionTemplates />"));
+            //Bind a recipientTemplate instance to an actionTemplate instance
+            if(recTempResp.IsSuccess)
+                foreach(ActionTemplate ac in actTempResp.Templates)
+                    if (!string.IsNullOrEmpty(ac.RecipientTemplate))
+                        ac.recipientTemplateObj = recTempResp.Templates.Where(x => x.TemplateToken == ac.RecipientTemplate).FirstOrDefault();
+            return actTempResp;
         }
 
         /// <summary>
@@ -110,7 +149,12 @@ namespace ActionEventLib.action
         /// <param name="Password">Password to use</param>
         /// <returns></returns>
         public async Task<GetActionRulesResponse> GetActionRules(string IP, string User, string Password ) {
-            return parseGetActionRulesResponse(await base.sendRequestAsync(IP , User, Password , @"<act:GetActionRules/>" ));
+            GetActionConfigurationsResponse configResponse = await this.GetActionConfigurations(IP, User, Password);
+            GetActionRulesResponse rulesResponse = parseGetActionRulesResponse(await base.sendRequestAsync(IP, User, Password, @"<act:GetActionRules/>"));
+            if(configResponse.IsSuccess && rulesResponse.IsSuccess)
+                foreach(ActionRule r in rulesResponse.ActionRules)
+                    r.Configuration = configResponse.Configurations.Where(x => x.ConfigID == r.Configuration.ConfigID).FirstOrDefault();
+            return rulesResponse;
         }
 
         /// <summary>
@@ -169,7 +213,7 @@ namespace ActionEventLib.action
                 {
                     XElement configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_ACTION + "AddActionConfigurationResponse");
                     Response.Content = configResponse.Element(NS_ACTION + "ConfigurationID").Value;
-                    Configuration.ConfigurationID = int.Parse(Response.Content);
+                    Configuration.ConfigID = int.Parse(Response.Content);
                 }
                 catch (Exception ex)
                 {
@@ -286,12 +330,12 @@ namespace ActionEventLib.action
                     foreach (XElement el in configResponse.Elements())
                     {
                         conf = new ActionConfiguration();
-                        conf.ConfigurationID = int.Parse(el.Element(NS_ACTION + "ConfigurationID").Value);
+                        conf.ConfigID = int.Parse(el.Element(NS_ACTION + "ConfigurationID").Value);
                         conf.Name = el.Element(NS_ACTION + "Name").Value;
-                        conf.actionTemplate = new ActionTemplate() { TemplateToken = el.Element(NS_ACTION + "TemplateToken").Value };
+                        conf.TemplateToken = el.Element(NS_ACTION + "TemplateToken").Value;
 
                         foreach (XElement element in el.Element(NS_ACTION + "Parameters").Elements())
-                            conf.actionTemplate.Parameters.Add(element.Attribute("Name").Value, element.Attribute("Value").Value);
+                            conf.Parameters.Add(element.Attribute("Name").Value, element.Attribute("Value").Value);
 
                         response.Configurations.Add(conf);
                     }
@@ -337,7 +381,7 @@ namespace ActionEventLib.action
                                 );
                             }
                         //parse rule actionconfiguration id
-                        rule.Configuration = new ActionConfiguration() { ConfigurationID = int.Parse(el.Element(NS_ACTION + "PrimaryAction").Value) };
+                        rule.Configuration = new ActionConfiguration() { ConfigID = int.Parse(el.Element(NS_ACTION + "PrimaryAction").Value) };
                         //parse activation timout
                         if (el.HasElement(NS_ACTION + "ActivationTimeout"))
                             rule.SetActivationTimeout(int.Parse(Regex.Match(el.Element(NS_ACTION + "ActivationTimeout").Value, @"\d+").Value));

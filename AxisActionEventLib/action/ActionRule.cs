@@ -58,7 +58,7 @@ namespace ActionEventLib.action
                 sb.Append(@"</act:Conditions>");
             }
             sb.Append(@"<act:ActivationTimeout>" + this.ActivationTimeOut + "</act:ActivationTimeout>");
-            sb.Append(@"<act:PrimaryAction>" + Configuration.ConfigurationID + "</act:PrimaryAction>");
+            sb.Append(@"<act:PrimaryAction>" + Configuration.ConfigID + "</act:PrimaryAction>");
  
             return sb.ToString();
         }

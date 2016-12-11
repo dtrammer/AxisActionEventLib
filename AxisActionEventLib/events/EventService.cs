@@ -143,8 +143,8 @@ namespace ActionEventLib.events
 
             return response;
         }
-        //Recursive method to build the eventinstance topic string & extract Eventtrigger parameters (example of topic: tns1:Device/tnsaxis:Device/IO/VirtualPort)
         private EventTrigger newEventTrigger;
+        //Method to build the eventinstance topic string & extract Eventtrigger parameters (example of topic: tns1:Device/tnsaxis:Device/IO/VirtualPort) used in parseGetEventInstancesResponse()
         private void getTopics(String Topic, List<EventTrigger> Triggers, XElement Element)
         {
             try

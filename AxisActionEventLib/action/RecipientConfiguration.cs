@@ -17,12 +17,14 @@ namespace ActionEventLib.action
             StringBuilder sb = new StringBuilder();
             sb.Append("<act:Name>" + this.Name + "</act:Name>");
             sb.Append("<act:TemplateToken>" + this.TemplateToken + "</act:TemplateToken>");
-            sb.Append("<act:Parameters>");
 
-            foreach(KeyValuePair<string,string> entry in this.Parameters)
-                sb.Append("<act:Parameter Name=\"" + entry.Key  +  "\" Value=\"" + entry.Value +  "\"/>");
-
-            sb.Append("</act:Parameters>");
+            if (this.Parameters.Count > 0)
+            {
+                sb.Append("<act:Parameters>");
+                foreach (KeyValuePair<string, string> entry in this.Parameters)
+                    sb.Append("<act:Parameter Name=\"" + entry.Key + "\" Value=\"" + entry.Value + "\"/>");
+                sb.Append("</act:Parameters>");
+            }
 
             return sb.ToString();
         }
