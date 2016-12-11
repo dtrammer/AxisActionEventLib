@@ -47,8 +47,8 @@ The library encapsulates and facilitates many of the concepts described in the d
 The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse"
 <table>
 <th>ServiceResponse</th>
-<tr><td>bool IsSuccess</td><td></td></tr>
-<tr><td>HttpStatusCode HttpStatusCode</td><td></td></tr>
-<tr><td>string Content</td><td></td></tr>
-<tr><td>XElement SOAPContent</td><td></td></tr>
+<tr><td>bool IsSuccess</td><td>True if request succeeded with HTTP status 200, False in all other cases</td></tr>
+<tr><td>HttpStatusCode HttpStatusCode</td><td>The status code of the http response</td></tr>
+<tr><td>string Content</td><td>Will contain the result of the request if it succeeded, in other case it will contain the response body or exceptions messages</td></tr>
+<tr><td>XElement SOAPContent</td><td>The SOAP/XML response body of a successfull request</td></tr>
 </table>
