@@ -31,24 +31,22 @@ The library encapsulates and facilitates many of the concepts described in the d
 - All Action|Event services objects methods are asynchronous 
 
 
-<h3>Samples</h3>
+<h3>Quick samples</h3>
 
-- Instantiate an ActionService or EventService object
+- Get Action | Recipient Templates
+    
+    ActionService actionService = new ActionService();
+    GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync( "192.168.1.10" , "root" , "pass" );
 
-  ActionService actionService = new ActionService();
-  EventService eventService = new EventService();
+- Get EventInstances
+    EventService eventService = new EventService();
+    GetEventInstancesResponse response = await eventService.GetEventsInstancesAsync( "192.168.1.10" , "root" , "pass" );  
 
-- Get Action | Recipient Templates and EventInstances
-
-  GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync( "192.168.1.10" , "root" , "pass" );
-  GetEventInstancesResponse response = await eventService.GetEventsInstancesAsync( "192.168.1.10" , "root" , "pass" );
-
-
-The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse"
+The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse". The more specific types only add one extra member.(ex.: GetActionTemplatesResponse will only append a new List<ActionTemplate> member)
 <table>
 <th colspan="2">ServiceResponse</th>
 <tr><td>bool IsSuccess</td><td>True if request succeeded with HTTP status 200, False in all other cases</td></tr>
 <tr><td>HttpStatusCode HttpStatusCode</td><td>The status code of the http response</td></tr>
 <tr><td>string Content</td><td>Will contain the result of the request if it succeeded, in other case it will contain the response body or exceptions messages</td></tr>
-<tr><td>XElement SOAPContent</td><td>The SOAP/XML response body of a successfull request</td></tr>
+<tr><td>XElement SOAPContent</td><td>XML DOM object containing the SOAP/XML response body of a successfull request</td></tr>
 </table>
