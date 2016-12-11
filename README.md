@@ -35,11 +35,13 @@ The library encapsulates and facilitates many of the concepts described in the d
 
 - Get Action | Recipient Templates
     
-    ActionService actionService = new ActionService();
+    ActionService actionService = new ActionService();</br>    
     GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync( "192.168.1.10" , "root" , "pass" );
 
 - Get EventInstances
+    
     EventService eventService = new EventService();
+    
     GetEventInstancesResponse response = await eventService.GetEventsInstancesAsync( "192.168.1.10" , "root" , "pass" );  
 
 The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse". The more specific types only add one extra member.(ex.: GetActionTemplatesResponse will only append a new List<ActionTemplate> member)
