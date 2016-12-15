@@ -39,6 +39,8 @@ Based on services wsdl's :
 
 <h3>Quick samples</h3>
 
+- For more samples have a look at the test class in the UnitTest folder
+
 - Get Action | Recipient Templates
     
     ActionService actionService = new ActionService();</br>    
@@ -52,7 +54,9 @@ Based on services wsdl's :
 
 - Create a new Actionrule (event)
     
-- For more samples have a look at the test class in the UnitTest folder
+  Unless you know the different parameters that constitute an ActionConfiguration template and an Event Instance it's recommended that you first use the GetActionTemplates method and the GetEventInstances method to get the supported templates and events instances for the targeted device. This will also provide you with strongly typed instances that you can use directly to setup the action rule, example :
+  
+  
     
 
 The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse". The more specific types only add one or more extra members.(ex.: GetActionTemplatesResponse will only append a new List<ActionTemplate> member)
