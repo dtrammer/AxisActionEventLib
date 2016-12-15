@@ -26,6 +26,15 @@ The library encapsulates and provides strongly typed objects for all the concept
 
 <h3>Comments</h3>
 
+- Events are represented by ActionRule instances, it specifies how and when the Axis product performs an action. Example: record video when motion is detected outside office hours. An action rule consists of:
+    - a start event
+    - one or more conditions 
+    - a primary action
+    
+   The primary action will be executed when the start event occurs and all specified conditions are fulfilled. 
+   The start event can be omitted. Conditions can also be omitted, but either a start event or at least one condition must be specified.
+   The action will be stopped when any of the conditions is no longer fulfilled.
+
 - The default service address of Axis devices is <http://yourip/vapix/services>, this is used by default. This can be changed by assigning the Service_URL property of the service object
 
 - All Action|Event services objects methods are asynchronous 
