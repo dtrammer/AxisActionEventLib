@@ -12,7 +12,7 @@ It uses HTTP communication with SOAP/XML message content.
 
 <H3>Actions & Events principles</H3>
 
-To understand the concept, structure and terminology of the Action & Event webservices have a look at the official documentation here : http://www.axis.com/files/manuals/vapix_event_action_56628_en_1404.pdf
+To understand the concept, structure and terminology of the Action & Event webservices have a look at the official documentation here : http://www.axis.com/files/manuals/vapix_event_action_56628_en_1404.pdf.
 The library encapsulates and provides strongly typed objects for all the concepts described in the document.
 
 Based on services wsdl's :
@@ -51,9 +51,8 @@ Based on services wsdl's :
     GetEventInstancesResponse eventInstances = await eventService.GetEventsInstancesAsync( "192.168.1.10" , "root" , "pass" );  
 
 - Create a new Actionrule (event)
-
     
-
+- For more samples have a look at the test class in the UnitTest folder
     
 
 The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse". The more specific types only add one or more extra members.(ex.: GetActionTemplatesResponse will only append a new List<ActionTemplate> member)
