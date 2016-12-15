@@ -21,7 +21,7 @@ Simply download the AxisActionEventLib.dll file in the list above and add a new 
 
 To understand the concept, structure and terminology of the Action & Event webservices have a look at the official documentation here : http://www.axis.com/files/manuals/vapix_event_action_56628_en_1404.pdf
 
-The library encapsulates and facilitates many of the concepts described in the document.
+The library encapsulates and provides strongly typed objects for all the concepts described in the document.
 
 
 <h3>Comments</h3>
@@ -36,15 +36,21 @@ The library encapsulates and facilitates many of the concepts described in the d
 - Get Action | Recipient Templates
     
     ActionService actionService = new ActionService();</br>    
-    GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync( "192.168.1.10" , "root" , "pass" );
+    GetActionTemplatesResponse actionTemplates = await actionService.GetActionTemplatesAsync( "192.168.1.10" , "root" , "pass" );
 
 - Get EventInstances
     
     EventService eventService = new EventService();
     
-    GetEventInstancesResponse response = await eventService.GetEventsInstancesAsync( "192.168.1.10" , "root" , "pass" );  
+    GetEventInstancesResponse eventInstances = await eventService.GetEventsInstancesAsync( "192.168.1.10" , "root" , "pass" );  
 
-The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse". The more specific types only add one extra member.(ex.: GetActionTemplatesResponse will only append a new List<ActionTemplate> member)
+- Create a new Actionrule (event)
+
+    
+
+    
+
+The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse". The more specific types only add one or more extra members.(ex.: GetActionTemplatesResponse will only append a new List<ActionTemplate> member)
 <table>
 <th colspan="2">ServiceResponse</th>
 <tr><td>bool IsSuccess</td><td>True if request succeeded with HTTP status 200, False in all other cases</td></tr>
