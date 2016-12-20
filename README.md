@@ -57,13 +57,15 @@ Based on services wsdl's :
   Unless you know the different parameters that compose an ActionConfiguration template and Event Instance it's recommended that you first use the GetActionTemplates method and the GetEventInstances method to get the supported templates and events instances for the targeted device. This will also provide you with strongly typed instances that you can use directly to setup the action rule, example :
   
   - See the "Setup_ActionRule_Full_Sample" test method of the test class in the UnitTest folder
-    
+
+
+<h3>Additional info</h3>
 
 The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse". The more specific types only add one or more extra members.(ex.: GetActionTemplatesResponse will only append a new Dictionary<ActionTemplate> member)
 <table>
 <th colspan="2">ServiceResponse</th>
-<tr><td>bool IsSuccess</td><td>True if request succeeded with HTTP status 200, False in all other cases</td></tr>
-<tr><td>HttpStatusCode HttpStatusCode</td><td>The status code of the http response</td></tr>
-<tr><td>string Content</td><td>Will contain the result of the request if it succeeded, in other case it will contain the response body or exceptions messages</td></tr>
-<tr><td>XElement SOAPContent</td><td>XML DOM object containing the SOAP/XML response body of a successfull request</td></tr>
+<tr><td>IsSuccess</td><td>bool</td><td>True if request succeeded with HTTP status 200, False in all other cases</td></tr>
+<tr><td>HttpStatusCode</td><td>HttpStatusCode</td><td>The status code of the http response</td></tr>
+<tr><td>Content</td><td>string</td><td>Will contain the result of the request if it succeeded, in other case it will contain the response body or exceptions messages</td></tr>
+<tr><td>SOAPContent</td><td>XElement</td><td>XML DOM object containing the SOAP/XML response body of a successfull request</td></tr>
 </table>
