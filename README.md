@@ -59,7 +59,7 @@ Based on services wsdl's :
   - See the "Setup_ActionRule_Full_Sample" test method of the test class in the UnitTest folder
     
 
-The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse". The more specific types only add one or more extra members.(ex.: GetActionTemplatesResponse will only append a new List<ActionTemplate> member)
+The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse". The more specific types only add one or more extra members.(ex.: GetActionTemplatesResponse will only append a new Dictionary<ActionTemplate> member)
 <table>
 <th colspan="2">ServiceResponse</th>
 <tr><td>bool IsSuccess</td><td>True if request succeeded with HTTP status 200, False in all other cases</td></tr>
