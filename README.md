@@ -63,7 +63,7 @@ Based on services wsdl's :
 
 The responses instances returned by the Action|Event services methods all share the same base type "ServiceResponse". The more specific types only add one or more extra members.(ex.: GetActionTemplatesResponse will only append a new Dictionary<ActionTemplate> member)
 <table>
-<th colspan="2">ServiceResponse</th>
+<th colspan="3">ServiceResponse</th>
 <tr><td>IsSuccess</td><td>bool</td><td>True if request succeeded with HTTP status 200, False in all other cases</td></tr>
 <tr><td>HttpStatusCode</td><td>HttpStatusCode</td><td>The status code of the http response</td></tr>
 <tr><td>Content</td><td>string</td><td>Will contain the result of the request if it succeeded, in other case it will contain the response body or exceptions messages</td></tr>
