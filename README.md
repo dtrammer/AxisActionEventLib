@@ -66,6 +66,6 @@ The responses instances returned by the Action|Event services methods all share 
 <th colspan="3">ServiceResponse</th>
 <tr><td>IsSuccess</td><td>bool</td><td>True if request succeeded with HTTP status 200, False in all other cases</td></tr>
 <tr><td>HttpStatusCode</td><td>HttpStatusCode</td><td>The status code of the http response</td></tr>
-<tr><td>Content</td><td>string</td><td>Will contain the result of the request if it succeeded, in other case it will contain the response body or exceptions messages</td></tr>
+<tr><td>Content</td><td>string</td><td>Will contain the result of the request if it succeeded, in all other cases it will contain the response body or exceptions messages</td></tr>
 <tr><td>SOAPContent</td><td>XElement</td><td>XML DOM object containing the SOAP/XML response body of a successfull request</td></tr>
 </table>
