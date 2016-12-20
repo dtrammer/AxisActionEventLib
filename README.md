@@ -54,7 +54,7 @@ Based on services wsdl's :
 
 - Create a new Actionrule (event)
     
-  Unless you know the different parameters that constitute an ActionConfiguration template and an Event Instance it's recommended that you first use the GetActionTemplates method and the GetEventInstances method to get the supported templates and events instances for the targeted device. This will also provide you with strongly typed instances that you can use directly to setup the action rule, example :
+  Unless you know the different parameters that compose an ActionConfiguration template and Event Instance it's recommended that you first use the GetActionTemplates method and the GetEventInstances method to get the supported templates and events instances for the targeted device. This will also provide you with strongly typed instances that you can use directly to setup the action rule, example :
   
   
     
