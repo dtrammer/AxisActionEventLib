@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using ActionEventLib.templates;
 using ActionEventLib.events;
-using AxisActionEventLib.events;
 
 namespace ActionEventLibTests
 {
@@ -32,13 +31,13 @@ namespace ActionEventLibTests
         {
             GetActionTemplatesResponse response = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
 
-            foreach (ActionTemplate t in response.Templates)
+            foreach (KeyValuePair<string,ActionTemplate> t in response.Templates)
             {
                 Console.WriteLine("New template : " + t.ToString());
-                Console.WriteLine("\t" + "Recipient : " + t.RecipientTemplate);
-                Console.WriteLine("\t" + "Ref token : " + (t.recipientTemplateObj != null ? t.recipientTemplateObj.TemplateToken : "Null"));
+                Console.WriteLine("\t" + "Recipient : " + t.Value.RecipientTemplate);
+                Console.WriteLine("\t" + "Ref token : " + (t.Value.recipientTemplateObj != null ? t.Value.recipientTemplateObj.TemplateToken : "Null"));
                 Console.WriteLine("Template parameters:");
-                foreach (string s in t.Get_Parameters())
+                foreach (string s in t.Value.Get_Parameters())
                     Console.WriteLine("\t" + s);
             }
             Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && !response.SOAPContent.IsEmpty && response.Templates.Count > 0);
@@ -67,15 +66,15 @@ namespace ActionEventLibTests
     [TestMethod]
         public async Task Get_ActionRules()
         {
-            GetActionRulesResponse response = await actionService.GetActionRules(VALID_IP, VALID_USER, VALID_PASS);
+            GetActionRulesResponse response = await actionService.GetActionRulesAsync(VALID_IP, VALID_USER, VALID_PASS);
 
             if (!response.IsSuccess)
                 Console.WriteLine("NOT 200 OK : " + response.Content);
             else
                 foreach (ActionRule ar in response.ActionRules)
                 {
-                    Console.WriteLine(ar.ToString());
-                    Console.WriteLine(ar.Configuration.ToString());
+                    Console.WriteLine("Action Rule : " + "\r\n" + "\t" + ar.ToString());
+                    Console.WriteLine("\t" + "Used action Configuration : " + "\r\n" + "\t" + ar.Configuration.ToString());
                 }
 
             Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && !response.SOAPContent.IsEmpty);
@@ -92,7 +91,7 @@ namespace ActionEventLibTests
                 Configuration = new ActionConfiguration() { ConfigID = VALID_ACTIONCONFIG_ID }
             };
 
-            ServiceResponse response = await actionService.AddActionRule(VALID_IP, VALID_USER, VALID_PASS , newActionRule);
+            ServiceResponse response = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS , newActionRule);
 
             if (!response.IsSuccess)
                 Console.WriteLine("Error : " + response.Content);
@@ -119,7 +118,7 @@ namespace ActionEventLibTests
             }; 
 
 
-            ServiceResponse response = await actionService.AddActionRule(VALID_IP, VALID_USER, VALID_PASS, newActionRule);
+            ServiceResponse response = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS, newActionRule);
 
             Console.WriteLine("[AddActionRuleWithInvalidParams] Rule ID : " + response.Content);
 
@@ -131,7 +130,7 @@ namespace ActionEventLibTests
         [TestMethod]
             public async Task Get_ActionConfigurations()
             {
-                GetActionConfigurationsResponse response = await actionService.GetActionConfigurations(VALID_IP, VALID_USER, VALID_PASS);
+                GetActionConfigurationsResponse response = await actionService.GetActionConfigurationsAsync(VALID_IP, VALID_USER, VALID_PASS);
 
                 if (response.IsSuccess)
                     foreach (ActionConfiguration ac in response.Configurations)
@@ -142,7 +141,7 @@ namespace ActionEventLibTests
             [TestMethod]
             public async Task Get_ActionConfigurationsWithWrongCredentials_IsUnauthorized()
             {
-                GetActionConfigurationsResponse response = await actionService.GetActionConfigurations(VALID_IP, "root2", VALID_PASS);
+                GetActionConfigurationsResponse response = await actionService.GetActionConfigurationsAsync(VALID_IP, "root2", VALID_PASS);
 
                 Assert.IsTrue(response.HttpStatusCode == System.Net.HttpStatusCode.Unauthorized);
             }
@@ -170,7 +169,7 @@ namespace ActionEventLibTests
                 m_actionConfiguration.Parameters.Add("proxy_password", "");
                 m_actionConfiguration.Parameters.Add("qos", "");
 
-                ServiceResponse response = await actionService.AddActionConfiguration(VALID_IP , VALID_USER , VALID_PASS , m_actionConfiguration);
+                ServiceResponse response = await actionService.AddActionConfigurationAsync(VALID_IP , VALID_USER , VALID_PASS , m_actionConfiguration);
 
                 Console.WriteLine("[AddActionConfigurations] " + m_actionConfiguration.ConfigID);
 
@@ -180,7 +179,7 @@ namespace ActionEventLibTests
             [TestMethod]
             public async Task Remove_ActionConfigurations()
             {
-                ServiceResponse response = await actionService.RemoveActionConfiguration(VALID_IP, VALID_USER, VALID_PASS, VALID_ACTIONCONFIG_ID);
+                ServiceResponse response = await actionService.RemoveActionConfigurationAsync(VALID_IP, VALID_USER, VALID_PASS, VALID_ACTIONCONFIG_ID);
                 Console.WriteLine(response.Content);
                 if (response.SOAPContent != null)
                     Console.WriteLine(response.SOAPContent);
@@ -194,19 +193,41 @@ namespace ActionEventLibTests
         {
             GetRecipientTemplatesResponse response = await actionService.GetRecipientTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
 
+            foreach(KeyValuePair<string,RecipientTemplate> t in response.Templates)
+            {
+                Console.WriteLine("Recipient template token : " + t.Key + "\r\n" + "Template parameters : ");
+                foreach (KeyValuePair<string,string> param in t.Value.Parameters)
+                    Console.WriteLine("\t" + param.Key);
+            }
+
             Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && !response.SOAPContent.IsEmpty && response.Templates.Count > 0);
         }
-        [TestMethod]
-        public async Task Get_RecipientConfig()
-        {
-            GetRecipientConfigurationsResponse response = await actionService.GetRecipientConfigurations(VALID_IP, VALID_USER, VALID_PASS);
 
-            Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && !response.SOAPContent.IsEmpty && response.Configurations != null);
+        [TestMethod]
+        public async Task Add_RecipientConfiguration_NetworkShare()
+        {
+            RecipientConfiguration recConfig = new RecipientConfiguration()
+            {
+                Name = "NetworkShare",
+                TemplateToken = "com.axis.recipient.networkshare",
+                Parameters = new Dictionary<string, string>() {
+                     { "upload_path", "VIDEO" } ,
+                     { "share_id" , "controlledStorage-AzBy" } ,
+                     { "qos" , "" }
+                 }
+            };
+
+            ServiceResponse addRecipientResponse = await actionService.AddRecipientConfigurationAsync(VALID_IP, VALID_USER, VALID_PASS, recConfig);
+
+            Console.WriteLine("new recipientconfig id : " + recConfig.ConfigurationID);
+
+            //If successfull => IsSuccess should be true and the config ID should be set 
+            Assert.IsTrue(addRecipientResponse.IsSuccess && recConfig.ConfigurationID != 0);
         }
 
         RecipientConfiguration m_recipientConfig;
         [TestMethod]
-        public async Task Add_RecipientConfigWithValidParams_IsSuccessAndReturnsConfigID()
+        public async Task Add_RecipientConfiguration_TCP_Message_Host()
         {
             m_recipientConfig = new RecipientConfiguration()
             {
@@ -218,17 +239,26 @@ namespace ActionEventLibTests
             m_recipientConfig.Parameters.Add("port", "80");
             m_recipientConfig.Parameters.Add("qos", "");
 
-            ServiceResponse response = await actionService.AddRecipientConfiguration(VALID_IP, VALID_USER, VALID_PASS, m_recipientConfig);
+            ServiceResponse response = await actionService.AddRecipientConfigurationAsync(VALID_IP, VALID_USER, VALID_PASS, m_recipientConfig);
 
-            Console.WriteLine("[AddRecipientConfigWithValidParams] " + m_recipientConfig.ConfigurationID);
-
+            Console.WriteLine("new recipientconfig id : " + m_recipientConfig.ConfigurationID);
+            
+            //If successfull => IsSuccess should be true and the config ID should be set 
             Assert.IsTrue(response.IsSuccess && m_recipientConfig.ConfigurationID != 0);
+        }
+
+        [TestMethod]
+        public async Task Get_RecipientConfig()
+        {
+            GetRecipientConfigurationsResponse response = await actionService.GetRecipientConfigurationsAsync(VALID_IP, VALID_USER, VALID_PASS);
+
+            Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && !response.SOAPContent.IsEmpty && response.Configurations != null);
         }
 
         [TestMethod]
         public async Task RemoveRecipientConfigWithValidParams_IsSuccessWithRemoveRecipientConfigurationResponse()
         {
-            ServiceResponse response = await actionService.RemoveRecipientConfiguration(VALID_IP, VALID_USER, VALID_PASS,1);
+            ServiceResponse response = await actionService.RemoveRecipientConfigurationAsync(VALID_IP, VALID_USER, VALID_PASS,1);
 
             Assert.IsTrue(response.IsSuccess && response.HttpStatusCode == System.Net.HttpStatusCode.OK && Regex.IsMatch(response.SOAPContent.ToString(), "RemoveRecipientConfigurationResponse"));
         }
@@ -248,16 +278,16 @@ namespace ActionEventLibTests
             {
                 Console.WriteLine(e.ToString());
                 Console.WriteLine("IsPropertyState : " + e.isProperty);
-                if (e.Params.Count > 0)
+                if (e.Parameters.Count > 0)
                 {
                     Console.WriteLine("Parameters :");
-                    foreach (EventTriggerParam p in e.Params)
+                    foreach (KeyValuePair<string,EventTriggerParam> kv in e.Parameters)
                     {
-                        Console.WriteLine("\t" + p.Name);
-                        if (p.DefaultValues.Count > 0)
+                        Console.WriteLine("\t" + kv.Key);
+                        if (kv.Value.DefaultValues.Count > 0)
                         {
                             Console.WriteLine("\t" + "Possible values : ");
-                            foreach (string s in p.DefaultValues)
+                            foreach (string s in kv.Value.DefaultValues)
                                 Console.WriteLine("\t\t" + s);
                         }
                     }
@@ -394,6 +424,61 @@ namespace ActionEventLibTests
 
 
         #endregion
+
+        //Recommended method to setup an ActionRule, 
+        //Setup an ActionRule that triggers on VMD3 motion detection and add an extra virtual input trigger condition
+        //  So if Motion is detected and the virtual input state is active the event will trigger
+        [TestMethod]
+        public async Task Setup_ActionRule_Full_Sample()
+        {
+            //Sync templates and eventinstances, this could be done once and stored globally 
+            //as in 95% of cases all devices share the same templates and event instances
+            GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
+            GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
+
+            //Create an ActionConfiguration first,
+            //By passing a ActionTemplate instance, the ActionCofig will directly import the necessary action and associated recipient template parameters
+            //To get a quick overview (text output) of the possible template parameters, runt the "Get_ActionTemplates" test method 
+            ActionConfiguration sendToNetworkShareConfig = new ActionConfiguration(aTemplates.Templates["com.axis.action.fixed.send_images.networkshare"]);
+           
+                //Set the action configuration parameters, 
+                sendToNetworkShareConfig.Parameters["stream_options"] = "resolution=640x480";
+                sendToNetworkShareConfig.Parameters["pre_duration"] = "3000"; //milliseconds
+                sendToNetworkShareConfig.Parameters["post_duration"] = "3000"; //milliseconds
+                sendToNetworkShareConfig.Parameters["max_images"] = "6";
+                sendToNetworkShareConfig.Parameters["create_folder"] = ""; //Modifiers can be used, see camera help (web-ui \ Events)
+                sendToNetworkShareConfig.Parameters["filename"] = "motionDetected_";
+                sendToNetworkShareConfig.Parameters["max_sequence_number"] = "6";
+                sendToNetworkShareConfig.Parameters["upload_path"] = "VIDEO";
+                sendToNetworkShareConfig.Parameters["share_id"] = "controlledStorage-AzBy"; //To find the shareid use http://<ip>/axis-cgi/disks/networkshare/list.cgi?schemaversion=1&shareid=all
+                sendToNetworkShareConfig.Parameters["qos"] = "";
+
+            ServiceResponse AddConfigResponse = await actionService.AddActionConfigurationAsync(VALID_IP, VALID_USER, VALID_PASS, sendToNetworkShareConfig);
+
+            Console.WriteLine("Add new action config : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and config ID : " + sendToNetworkShareConfig.ConfigID);
+
+            //VMD3 - TopicExpression - tns1:RuleEngine/tnsaxis:RuleEngine/VMD3/vmd3_video_1
+
+            ActionRule newMotionDetectionRule = new ActionRule()
+            {
+                Name = "MD Rule",
+                Enabled = true,
+                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:RuleEngine/tnsaxis:RuleEngine/VMD3/vmd3_video_1"),
+                Configuration = sendToNetworkShareConfig,
+            };
+
+            newMotionDetectionRule.SetActivationTimeout(10);
+            newMotionDetectionRule.Trigger.Parameters["areaid"].Value = "0"; //Is the default value - for quick overview run Test GetEventInstances
+            newMotionDetectionRule.Trigger.Parameters["active"].Value = "1"; //=True, it takes a boolean value but does not work with True / False directly
+
+            //Add the rule to the device, either create a new ServiceResponse instance but you can use the AddConfigResponse instance as well
+            AddConfigResponse = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS, newMotionDetectionRule);
+
+            Console.WriteLine("Add new action rule : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and rule ID : " + newMotionDetectionRule.RuleID);
+
+            Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
+        }
+
 
     }
 }
