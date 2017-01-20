@@ -11,14 +11,21 @@ namespace ActionEventLib.events
     {
         public bool isProperty { get; set; }
         public string TopicExpression { get; set; }
-        public List<EventTriggerParam> Params = new List<EventTriggerParam>();
-
+        public Dictionary<string, EventTriggerParam> Parameters = new Dictionary<string, EventTriggerParam>();
+        
         public EventTrigger(string TopicExpression, bool IsProperty = false, string MessageContent = "") {
             this.TopicExpression = TopicExpression;
             this.isProperty = IsProperty;
             if (!string.IsNullOrEmpty(MessageContent))
                 foreach (Match m in Regex.Matches(MessageContent, @"(?<=boolean.{3,3}SimpleItem.{1,1}).*?(?=\])", RegexOptions.Singleline))
-                    this.Params.Add(new EventTriggerParam(Regex.Match(m.Value, @"(?<=@Name="").*?(?="")").Value, "", Regex.Match(m.Value, @"(?<=@Value="").*(?="")").Value));
+                    this.add_parameter(Regex.Match(m.Value, @"(?<=@Name="").*?(?="")").Value, new EventTriggerParam(Regex.Match(m.Value, @"(?<=@Name="").*?(?="")").Value, "", Regex.Match(m.Value, @"(?<=@Value="").*(?="")").Value));
+
+        }
+
+        public void add_parameter(string ParamName , EventTriggerParam Param)
+        {
+            if (!this.Parameters.ContainsKey(ParamName))
+                this.Parameters.Add(ParamName, Param);
         }
 
         public override string ToString()
@@ -26,13 +33,13 @@ namespace ActionEventLib.events
             StringBuilder sb = new StringBuilder();
             sb.Append(@"<wsnt:TopicExpression Dialect=""http://docs.oasis-open.org/wsn/t-1/TopicExpression/Concrete"">" + TopicExpression + "</wsnt:TopicExpression>");
 
-            if (Params.Count > 0)
+            if (this.Parameters.Count > 0)
             {
                 sb.Append(@"<wsnt:MessageContent Dialect=""http://www.onvif.org/ver10/tev/messageContentFilter/ItemFilter"">");
 
-                for(int cnt = 0; cnt < this.Params.Count; cnt++)
+                foreach(KeyValuePair<string,EventTriggerParam> kv in this.Parameters)
                 {
-                    sb.Append(this.Params[cnt].ToString());
+                    sb.Append(kv.Value.ToString());
                     sb.Append(" and ");
                 }
 

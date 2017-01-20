@@ -1,8 +1,6 @@
 ﻿
 using ActionEventLib.events;
 using ActionEventLib.types;
-using AxisActionEventLib.events;
-using AxisActionEventLib.types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,9 +25,9 @@ namespace ActionEventLib.events
         /// <param name="IP">The device ip address</param>
         /// <param name="User">User name used for the request</param>
         /// <param name="Password">Password used for the request</param>
-        /// <returns>GetEventInstancesResponse</returns>
+        /// <returns>GetEventInstancesResponse, with GetEventInstancesResponse.EventInstances containing a List<EventTrigger> with valid event instances of the device</returns>
         public async Task<GetEventInstancesResponse> GetEventsInstancesAsync(string IP , string User , string Password) {
-            return parseGetEventInstancesResponse(await base.sendRequestAsync(IP, User , Password , @"<even:GetEventInstances />"));
+            return parseGetEventInstancesResponse(await sendRequestAsync(IP, User , Password , @"<even:GetEventInstances />"));
         }
 
         /// <summary>
@@ -38,12 +36,12 @@ namespace ActionEventLib.events
         /// <param name="IP">Device ip address</param>
         /// <param name="Credentials">User credentials for the request</param>
         /// <param name="ScheduleType">Possible values "Interval" or "Pulse"</param>
-        /// <returns>GetScheduledEventsResponse</returns>
+        /// <returns>GetScheduledEventsResponse, with GetScheduledEventsResponse.ScheduledEvents containing a List<ScheduledEvent> with the Scheduled events of the device</returns>
         public async Task<GetScheduledEventsResponse> GetScheduledEventsAsync(string IP , string User, string Password , String ScheduleType = "") {
             if (string.IsNullOrEmpty(ScheduleType))
-                return this.parseGetScheduledEventsResponse(await base.sendRequestAsync(IP, User, Password,  @"<even:GetScheduledEvents />"));
+                return this.parseGetScheduledEventsResponse(await sendRequestAsync(IP, User, Password,  @"<even:GetScheduledEvents />"));
             else
-                return this.parseGetScheduledEventsResponse(await base.sendRequestAsync(IP, User, Password, @"<even:GetScheduledEvents><even:ScheduleFilter><even:ScheduleType>" + ScheduleType + @"</even:ScheduleFilter></even:GetScheduledEvents>"));
+                return this.parseGetScheduledEventsResponse(await sendRequestAsync(IP, User, Password, @"<even:GetScheduledEvents><even:ScheduleFilter><even:ScheduleType>" + ScheduleType + @"</even:ScheduleFilter></even:GetScheduledEvents>"));
         }
 
         /// <summary>
@@ -61,7 +59,7 @@ namespace ActionEventLib.events
                                 @"<even:active>" + (Active ? 1 : 0) + @"</even:active>" +
                                 @"</even:ChangeVirtualInputState>";
 
-            return this.parseChangeVirtualInputStateResponse(await base.sendRequestAsync(  IP , User , Password , bodyAction ));
+            return this.parseChangeVirtualInputStateResponse(await sendRequestAsync(  IP , User , Password , bodyAction ));
         }
 
         /// <summary>
@@ -73,11 +71,11 @@ namespace ActionEventLib.events
         /// <param name="Password">Password used for the request</param>
         /// <param name="Schedule">An ICalendar object that indicates dateTime validity for the event</param>
         /// <param name="Event">A ScheduledEvent instance</param>
-        /// <returns>ServiceResponse</returns>
+        /// <returns>ServiceResponse, with ServiceResponse.content containing the returned new EventID if successfull</returns>
         public async Task<ServiceResponse> Add_ScheduledEventAsync(string IP, string User, string Password, ScheduledEvent Event) {
-            return await base.sendRequestAsync( IP , User , Password, @"<even:AddScheduledEvent><even:NewScheduledEvent>" + Event.ToString() + @"</even:NewScheduledEvent></even:AddScheduledEvent>");
+            return this.parseAddScheduledEventResponse(await sendRequestAsync( IP , User , Password, @"<even:AddScheduledEvent><even:NewScheduledEvent>" + Event.ToString() + @"</even:NewScheduledEvent></even:AddScheduledEvent>"),Event);
         }
-        
+
         /// <summary>
         /// Method use to edit an existing scheduled event
         /// </summary>
@@ -86,7 +84,7 @@ namespace ActionEventLib.events
         /// <param name="Password"></param>
         /// <param name="EventID"></param>
         /// <param name="NewEvent"></param>
-        /// <returns></returns>
+        /// <returns>ServiceResponse, with ServiceResponse.content containing the returned new EventID if successfull</returns>
         public async Task<ServiceResponse> Edit_ScheduledEventAsync(string IP, string User, string Password, string EventID , ScheduledEvent NewEvent)
         {
             ServiceResponse response = await this.Remove_ScheduledEventAsync(IP, User, Password, EventID);
@@ -103,7 +101,7 @@ namespace ActionEventLib.events
         /// <param name="User">User name used for the request</param>
         /// <param name="Password">Password used for the request</param>
         /// <param name="EventID">The ID of the scheduled event to remove</param>
-        /// <returns>ServiceResponse</returns>
+        /// <returns>ServiceResponse, with ServiceResponse.content containing the response body</returns>
         public async Task<ServiceResponse> Remove_ScheduledEventAsync(string IP, string User, string Password, string EventID) {
             String bodyAction = @"<even:RemoveScheduledEvent>" +
                                 @"<even:EventID>" + EventID + @"</even:EventID>" +
@@ -177,14 +175,13 @@ namespace ActionEventLib.events
         }
         private void parseEventTriggerParam(XElement SimpleItemInstance , EventTrigger NewEventTrigger)
         {
+            string paramName = SimpleItemInstance.GetAttributeValue("Name");
 
-            NewEventTrigger.Params.Add(new EventTriggerParam(SimpleItemInstance.GetAttributeValue("Name"), SimpleItemInstance.GetAttributeValue(NS_EVENT + "NiceName"), "", SimpleItemInstance.HasAttribute("onvif-element")));
+            NewEventTrigger.add_parameter(paramName, new EventTriggerParam(paramName, SimpleItemInstance.GetAttributeValue(NS_EVENT + "NiceName"), "", SimpleItemInstance.HasAttribute("onvif-element")));
 
             if (SimpleItemInstance.Elements().Count() > 0)
-            {
                 foreach (XElement subElement in SimpleItemInstance.Elements())
-                    NewEventTrigger.Params[NewEventTrigger.Params.Count - 1].DefaultValues.Add(subElement.Value);
-            }
+                    NewEventTrigger.Parameters[paramName].DefaultValues.Add(subElement.Value);
         }
         private ServiceResponse parseChangeVirtualInputStateResponse(ServiceResponse Response)
         {
@@ -212,7 +209,7 @@ namespace ActionEventLib.events
                     XElement ScheduledEventsResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_EVENT + "GetScheduledEventsResponse").Element(NS_EVENT + "ScheduledEvents");
                     foreach (XElement element in ScheduledEventsResponse.Elements())
                     {
-                        response.ScheduledEvents.Add(new AxisActionEventLib.events.ScheduledEvent()
+                        response.ScheduledEvents.Add(new ActionEventLib.events.ScheduledEvent()
                         {
                             EventID = element.Element(NS_EVENT + "EventID").Value,
                             Name = element.Element(NS_EVENT + "Name").Value,
@@ -232,7 +229,10 @@ namespace ActionEventLib.events
         private ServiceResponse parseAddScheduledEventResponse(ServiceResponse Response, ScheduledEvent Event)
         {
             if (Response.IsSuccess)
+            {
                 Event.EventID = Response.SOAPContent.Element(NS_EVENT + "AddScheduledEventResponse").Element(NS_EVENT + "EventID").Value;
+                Response.Content = Response.SOAPContent.Element(NS_EVENT + "AddScheduledEventResponse").Element(NS_EVENT + "EventID").Value;
+            }
 
             return Response;
         }
