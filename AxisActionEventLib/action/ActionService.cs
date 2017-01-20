@@ -2,7 +2,6 @@
 using ActionEventLib.events;
 using ActionEventLib.templates;
 using ActionEventLib.types;
-using AxisActionEventLib.types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +32,7 @@ namespace ActionEventLib.action
         /// <param name="Password">Password to use</param>
         /// <param name="Configuration"></param>
         /// <returns>Returns the ID of the configuration stored on the device</returns>
-        public async Task<ServiceResponse> AddRecipientConfiguration(string IP , string User , string Password , RecipientConfiguration Configuration) {
+        public async Task<ServiceResponse> AddRecipientConfigurationAsync(string IP , string User , string Password , RecipientConfiguration Configuration) {
             return parseAddRecipientConfigResponse(await base.sendRequestAsync(IP,  User,  Password, @"<act:AddRecipientConfiguration><act:NewRecipientConfiguration>" + Configuration.ToString() + @"</act:NewRecipientConfiguration></act:AddRecipientConfiguration>") , Configuration);
         }
 
@@ -45,8 +44,8 @@ namespace ActionEventLib.action
         /// <param name="User">User to authenticate the http request</param>
         /// <param name="Password">Password to use</param>
         /// <param name="Configuration">ActionConfiguration reference</param>
-        /// <returns>Returns the ID of the configuration stored on the device</returns>
-        public async Task<ServiceResponse> AddActionConfiguration(string IP, string User, string Password, ActionConfiguration Configuration ) {
+        /// <returns>ServiceResponse, with ServiceResponse.content containing the ID of the configuration stored on the device</returns>
+        public async Task<ServiceResponse> AddActionConfigurationAsync(string IP, string User, string Password, ActionConfiguration Configuration ) {
             return parseAddActionConfigResponse(await base.sendRequestAsync(IP, User,  Password, @"<act:AddActionConfiguration><act:NewActionConfiguration>" + Configuration.ToString() + "</act:NewActionConfiguration></act:AddActionConfiguration>"), Configuration);
         }
 
@@ -58,8 +57,8 @@ namespace ActionEventLib.action
         /// <param name="User">User to authenticate the http request</param>
         /// <param name="Password">Password to use</param>
         /// <param name="NewRule">ActionRule reference</param>
-        /// <returns></returns>
-        public async Task<ServiceResponse> AddActionRule(string IP, string User, string Password, ActionRule NewRule)
+        /// <returns>ServiceResponse, with ServiceResponse.content containing the ID of the rule stored on the device</returns>
+        public async Task<ServiceResponse> AddActionRuleAsync(string IP, string User, string Password, ActionRule NewRule)
         {
             string actionBody = @"<act:AddActionRule><act:NewActionRule>"
                                 + NewRule.ToString()
@@ -74,13 +73,13 @@ namespace ActionEventLib.action
         /// <param name="IP"></param>
         /// <param name="User"></param>
         /// <param name="Password"></param>
-        /// <param name="Config"></param>
-        /// <returns>ServiceResponse</returns>
-        public async Task<ServiceResponse> Update_ActionConfiguration(string IP , string User , string Password , ActionConfiguration Config)
+        /// <param name="Config">ActionConfiguration reference</param>
+        /// <returns>ServiceResponse, with ServiceResponse.content containing the new ID of the configuration stored on the device</returns>
+        public async Task<ServiceResponse> Update_ActionConfigurationAsync(string IP , string User , string Password , ActionConfiguration Config)
         {
-            ServiceResponse response = await this.RemoveActionConfiguration(IP, User, Password, Config.ConfigID);
+            ServiceResponse response = await this.RemoveActionConfigurationAsync(IP, User, Password, Config.ConfigID);
             if (response.IsSuccess)
-                response = await this.AddActionConfiguration(IP, User, Password, Config);
+                response = await this.AddActionConfigurationAsync(IP, User, Password, Config);
             return response;
         }
 
@@ -91,12 +90,12 @@ namespace ActionEventLib.action
         /// <param name="User"></param>
         /// <param name="Password"></param>
         /// <param name="Config"></param>
-        /// <returns>ServiceResponse</returns>
-        public async Task<ServiceResponse> Update_ActionRule(string IP, string User, string Password, ActionRule Rule)
+        /// <returns>ServiceResponse, with ServiceResponse.content containing the new ID of the rule stored on the device</returns>
+        public async Task<ServiceResponse> Update_ActionRuleAsync(string IP, string User, string Password, ActionRule Rule)
         {
-            ServiceResponse response = await this.RemoveActionRule(IP, User, Password, Rule.RuleID);
+            ServiceResponse response = await this.RemoveActionRuleAsync(IP, User, Password, Rule.RuleID);
             if (response.IsSuccess)
-                response = await this.AddActionRule(IP, User, Password, Rule);
+                response = await this.AddActionRuleAsync(IP, User, Password, Rule);
             return response;
         }
 
@@ -106,16 +105,15 @@ namespace ActionEventLib.action
         /// <param name="IP">The device ip address</param>
         /// <param name="User">User to authenticate the http request</param>
         /// <param name="Password">Password to use</param>
-        /// <returns>The supported Action Templates of the device</returns>
+        /// <returns>GetActionTemplatesResponse, GetActionTemplatesResponse.Templates contains a List<ActionTemplate> with the supported Action Templates of the device</returns>
         /// 
         public async Task<GetActionTemplatesResponse> GetActionTemplatesAsync(string IP , string User, string Password ) {
             GetRecipientTemplatesResponse recTempResp = await this.GetRecipientTemplatesAsync(IP, User, Password);
             GetActionTemplatesResponse actTempResp = parseGetActionTemplatesResponse(await base.sendRequestAsync(IP,  User,  Password , @"<act:GetActionTemplates />"));
             //Bind a recipientTemplate instance to an actionTemplate instance
-            if(recTempResp.IsSuccess)
-                foreach(ActionTemplate ac in actTempResp.Templates)
-                    if (!string.IsNullOrEmpty(ac.RecipientTemplate))
-                        ac.recipientTemplateObj = recTempResp.Templates.Where(x => x.TemplateToken == ac.RecipientTemplate).FirstOrDefault();
+            if (recTempResp.IsSuccess)
+                foreach (KeyValuePair<string, ActionTemplate> ac in actTempResp.Templates)
+                    recTempResp.Templates.TryGetValue(ac.Value.RecipientTemplate, out ac.Value.recipientTemplateObj);
             return actTempResp;
         }
 
@@ -125,7 +123,7 @@ namespace ActionEventLib.action
         /// <param name="IP">The device ip address</param>
         /// <param name="User">User to authenticate the http request</param>
         /// <param name="Password">Password to use</param>
-        /// <returns>Supported Recipient templates of the device</returns>
+        /// <returns>GetRecipientTemplatesResponse, GetRecipientTemplatesResponse.Templates contains a List<RecipientTemplate> with the supported Recipient Templates of the device</returns>
         public async Task<GetRecipientTemplatesResponse> GetRecipientTemplatesAsync(string IP, string User, string Password ) {
             return parseGetRecipientTemplatesResponse(await base.sendRequestAsync(IP,  User,  Password, @"<act:GetRecipientTemplates />"));
         }
@@ -136,8 +134,8 @@ namespace ActionEventLib.action
         /// <param name="IP">The device ip address</param>
         /// <param name="User">User to authenticate the http request</param>
         /// <param name="Password">Password to use</param>
-        /// <returns></returns>
-        public async Task<GetActionConfigurationsResponse> GetActionConfigurations(string IP, string User, string Password ) {
+        /// <returns>GetActionConfigurationsResponse, GetActionConfigurationsResponse.Configurations contains a List<ActionConfiguration> with the stored ActionConfigurations of the device</returns>
+        public async Task<GetActionConfigurationsResponse> GetActionConfigurationsAsync(string IP, string User, string Password ) {
             return parseGetActionConfigResponse(await base.sendRequestAsync(IP, User, Password, @"<act:GetActionConfigurations/>"));
         }
 
@@ -147,9 +145,9 @@ namespace ActionEventLib.action
         /// <param name="IP">The device ip address</param>
         /// <param name="User">User to authenticate the http request</param>
         /// <param name="Password">Password to use</param>
-        /// <returns></returns>
-        public async Task<GetActionRulesResponse> GetActionRules(string IP, string User, string Password ) {
-            GetActionConfigurationsResponse configResponse = await this.GetActionConfigurations(IP, User, Password);
+        /// <returns>GetActionRulesResponse, GetActionRulesResponse.ActionRules contains a List<ActionRule> with the stored ActionRules of the device</returns>
+        public async Task<GetActionRulesResponse> GetActionRulesAsync(string IP, string User, string Password ) {
+            GetActionConfigurationsResponse configResponse = await this.GetActionConfigurationsAsync(IP, User, Password);
             GetActionRulesResponse rulesResponse = parseGetActionRulesResponse(await base.sendRequestAsync(IP, User, Password, @"<act:GetActionRules/>"));
             if(configResponse.IsSuccess && rulesResponse.IsSuccess)
                 foreach(ActionRule r in rulesResponse.ActionRules)
@@ -163,8 +161,8 @@ namespace ActionEventLib.action
         /// <param name="IP">The device ip address</param>
         /// <param name="User">User to authenticate the http request</param>
         /// <param name="Password">Password to use</param>
-        /// <returns></returns>
-        public async Task<GetRecipientConfigurationsResponse> GetRecipientConfigurations(string IP, string User, string Password) {
+        /// <returns>GetRecipientConfigurationsResponse, GetRecipientConfigurationsResponse.Configurations contains a List<RecipientConfiguration> with the stored RecipientConfigurations of the device</returns>
+        public async Task<GetRecipientConfigurationsResponse> GetRecipientConfigurationsAsync(string IP, string User, string Password) {
             return parseGetRecipientConfigurations(await base.sendRequestAsync(IP, User , Password , @"<act:GetRecipientConfigurations/>"));
         }
 
@@ -175,8 +173,8 @@ namespace ActionEventLib.action
         /// <param name="User">User to authenticate the http request</param>
         /// <param name="Password">Password to use</param>
         /// <param name="id">The ConfigurationID of the ActionConfiguration, this id is returned after a successfull call to [AddActionConfiguration]</param>
-        /// <returns>ServiceResponse containing the RemoveActionConfigurationResponse</returns>
-        public async Task<ServiceResponse> RemoveActionConfiguration(string IP , string User, string Password , int id) {
+        /// <returns>ServiceResponse, ServiceResponse.content containing the response body</returns>
+        public async Task<ServiceResponse> RemoveActionConfigurationAsync(string IP , string User, string Password , int id) {
             return await base.sendRequestAsync(IP, User , Password, @"<act:RemoveActionConfiguration><act:ConfigurationID>" + id + @"</act:ConfigurationID></act:RemoveActionConfiguration>");
         }
 
@@ -187,8 +185,8 @@ namespace ActionEventLib.action
         /// <param name="User">User to authenticate the http request</param>
         /// <param name="Password">Password to use</param>
         /// <param name="RuleID">Rule ID, it can be obtained with GetActionRules</param>
-        /// <returns></returns>
-        public async Task<ServiceResponse> RemoveActionRule(string IP, string User, string Password, int RuleID) {
+        /// <returns>ServiceResponse, ServiceResponse.content containing the response body</returns>
+        public async Task<ServiceResponse> RemoveActionRuleAsync(string IP, string User, string Password, int RuleID) {
             return await base.sendRequestAsync(IP, User , Password , @"<act:RemoveActionRule><act:RuleID>" + RuleID + @"</act:RuleID></act:RemoveActionRule>");
         }
 
@@ -199,8 +197,8 @@ namespace ActionEventLib.action
         /// <param name="User">User to authenticate the http request</param>
         /// <param name="Password">Password to use</param>
         /// <param name="ConfigurationID">The configuration id, it can be obtained with GetActionConfigurations</param>
-        /// <returns></returns>
-        public async Task<ServiceResponse> RemoveRecipientConfiguration(string IP, string User, string Password, int ConfigurationID) {
+        /// <returns>ServiceResponse, ServiceResponse.content containing the response body</returns>
+        public async Task<ServiceResponse> RemoveRecipientConfigurationAsync(string IP, string User, string Password, int ConfigurationID) {
             return parseGetRecipientConfigurations(await base.sendRequestAsync(IP, User , Password, @"<act:RemoveRecipientConfiguration><act:ConfigurationID>" + ConfigurationID + @"</act:ConfigurationID></act:RemoveRecipientConfiguration>"));
         }
         #endregion
@@ -276,7 +274,7 @@ namespace ActionEventLib.action
                         foreach (XElement param in el.Element(NS_ACTION + "Parameters").Elements())
                             newTemplate.Parameters.Add(param.Attribute("Name").Value, string.Empty);
 
-                        response.Templates.Add(newTemplate);
+                        response.Templates.Add(newTemplate.TemplateToken, newTemplate);
                     }
                 }
                 catch (Exception ex)
@@ -306,7 +304,7 @@ namespace ActionEventLib.action
                         foreach (XElement param in el.Element(NS_ACTION + "Parameters").Elements())
                             newTemplate.Parameters.Add(param.Attribute("Name").Value, string.Empty);
 
-                        response.Templates.Add(newTemplate);
+                        response.Templates.Add(newTemplate.TemplateToken , newTemplate);
                     }
                 }
                 catch (Exception ex)
