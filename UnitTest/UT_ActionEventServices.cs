@@ -15,7 +15,7 @@ namespace ActionEventLibTests
     {
         string VALID_USER = "root";
         string VALID_PASS = "pass";
-        string VALID_IP = "192.168.1.67";
+        string VALID_IP = "192.168.1.223";
         string WRONG_IP = "192.168.1.67777";
         string WRONG_USERPASS = "rooooot";
 
@@ -23,7 +23,7 @@ namespace ActionEventLibTests
 
         ActionService actionService = new ActionService();
         ActionRule newActionRule;
-        int VALID_ACTIONCONFIG_ID = 2;
+        int VALID_ACTIONCONFIG_ID = 18;
 
         #region Action Templates
         [TestMethod]
@@ -85,9 +85,9 @@ namespace ActionEventLibTests
         {
             newActionRule = new ActionRule()
             {
-                Name = "UnitTestRule",
+                Name = "UnitTestRule2",
                 Enabled = true,
-                Trigger = new EventTrigger("tns1:VideoSource/tnsaxis:LiveStreamAccessed", true, "boolean(//SimpleItem[@Name=\"accessed\" and @Value=\"1\"]"),
+                Trigger = new EventTrigger("tns1:PTZController/tnsaxis:PTZPresets/Channel_1", false, "boolean(//SimpleItem[@Name=\"PresetToken\" and @Value=\"-1\"]) and boolean(//SimpleItem[@Name=\"on_preset\" and @Value=\"1\"])"),
                 Configuration = new ActionConfiguration() { ConfigID = VALID_ACTIONCONFIG_ID }
             };
 
@@ -425,6 +425,8 @@ namespace ActionEventLibTests
 
         #endregion
 
+        #region Full sammple tests
+
         //Recommended method to setup an ActionRule, 
         //Setup an ActionRule that triggers on VMD3 motion detection and add an extra virtual input trigger condition
         //  So if Motion is detected and the virtual input state is active the event will trigger
@@ -442,12 +444,12 @@ namespace ActionEventLibTests
             ActionConfiguration sendToNetworkShareConfig = new ActionConfiguration(aTemplates.Templates["com.axis.action.fixed.send_images.networkshare"]);
            
                 //Set the action configuration parameters, 
-                sendToNetworkShareConfig.Parameters["stream_options"] = "resolution=640x480";
+                sendToNetworkShareConfig.Parameters["stream_options"] = "resolution=640x480&amp;videocodec=jpeg&amp;camera=1"; 
                 sendToNetworkShareConfig.Parameters["pre_duration"] = "3000"; //milliseconds
                 sendToNetworkShareConfig.Parameters["post_duration"] = "3000"; //milliseconds
                 sendToNetworkShareConfig.Parameters["max_images"] = "6";
-                sendToNetworkShareConfig.Parameters["create_folder"] = ""; //Modifiers can be used, see camera help (web-ui \ Events)
-                sendToNetworkShareConfig.Parameters["filename"] = "motionDetected_";
+                sendToNetworkShareConfig.Parameters["create_folder"] = ""; 
+                sendToNetworkShareConfig.Parameters["filename"] = "image%y-%m-%d_%H-%M-%S-%f.jpg";//Modifiers can be used, see camera help (web-ui \ Events)
                 sendToNetworkShareConfig.Parameters["max_sequence_number"] = "6";
                 sendToNetworkShareConfig.Parameters["upload_path"] = "VIDEO";
                 sendToNetworkShareConfig.Parameters["share_id"] = "controlledStorage-AzBy"; //To find the shareid use http://<ip>/axis-cgi/disks/networkshare/list.cgi?schemaversion=1&shareid=all
@@ -457,13 +459,13 @@ namespace ActionEventLibTests
 
             Console.WriteLine("Add new action config : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and config ID : " + sendToNetworkShareConfig.ConfigID);
 
-            //VMD3 - TopicExpression - tns1:RuleEngine/tnsaxis:RuleEngine/VMD3/vmd3_video_1
+            //VMD3 - TopicExpression - tns1:RuleEngine/tnsaxis:VMD3/vmd3_video_1
 
             ActionRule newMotionDetectionRule = new ActionRule()
             {
                 Name = "MD Rule",
                 Enabled = true,
-                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:RuleEngine/tnsaxis:RuleEngine/VMD3/vmd3_video_1"),
+                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:RuleEngine/tnsaxis:VMD3/vmd3_video_1"),
                 Configuration = sendToNetworkShareConfig,
             };
 
@@ -480,5 +482,48 @@ namespace ActionEventLibTests
         }
 
 
+        ///SAMPLE - Create ActionRule - Preset Reached - Led Flashes 5 seconds
+        [TestMethod]
+        public async Task Setup_ActionRule_Sample_2()
+        {
+            GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
+            GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
+
+            //Create an ActionConfiguration first,
+            //By passing a ActionTemplate instance, the ActionCofig will directly import the necessary action and associated recipient template parameters
+            //To get a quick overview (text output) of the possible template parameters, runt the "Get_ActionTemplates" test method 
+            ActionConfiguration BlinkLed = new ActionConfiguration(aTemplates.Templates["com.axis.action.fixed.ledcontrol"]);
+ 
+                BlinkLed.Parameters["interval"] = "250";
+                BlinkLed.Parameters["led"] = "statusled";
+                BlinkLed.Parameters["color"] = "red,none";
+                BlinkLed.Parameters["duration"] = "5";
+
+            ServiceResponse AddConfigResponse = await actionService.AddActionConfigurationAsync(VALID_IP, VALID_USER, VALID_PASS, BlinkLed);
+            Console.WriteLine("Add new action config : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and config ID : " + BlinkLed.ConfigID);
+
+
+            ActionRule PresetReachedRule = new ActionRule()
+            {
+                Name = "PresetReachedRule",
+                Enabled = true,
+                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:PTZController/tnsaxis:PTZPresets/Channel_1"),
+                Configuration = BlinkLed,
+            };
+
+            PresetReachedRule.SetActivationTimeout(10);
+            PresetReachedRule.Trigger.Parameters["PresetToken"].Value = "-1"; //See Test GetEventInstances to see eventInstances output and lookup parameters
+            PresetReachedRule.Trigger.Parameters["on_preset"].Value = "1"; // Bool value is indicate with 1 / 0
+
+            //Add the rule to the device, either create a new ServiceResponse instance but you can use the AddConfigResponse instance as well
+            AddConfigResponse = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS, PresetReachedRule);
+
+            Console.WriteLine("Add new action rule : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and rule ID : " + PresetReachedRule.RuleID);
+
+            Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
+
+        }
+
+        #endregion
     }
 }
