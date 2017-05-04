@@ -118,18 +118,15 @@ namespace ActionEventLib.events
             {
                 try
                 {
+                    //Pre
                     IEnumerable<XElement> configResponse = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_EVENT + "GetEventInstancesResponse").Element(NS_WTOPIC + "TopicSet").Elements();
                     List<EventTrigger> EventTriggers = new List<EventTrigger>();
-                    string topic = "";
-
+                    //Process
                     foreach (XElement el in configResponse) //Iterate all tns1: topics
                     {
-                        topic = "tns1:" + el.Name.LocalName + "/tnsaxis:";
-
-                        if (!el.HasAttribute(NS_WTOPIC + "topic"))
-                            getTopics(topic, EventTriggers, el);
+                        getTopics( el.GetNameSpacePrefix() + el.Name.LocalName + "/", EventTriggers, el);
                     }
-
+                    //Post
                     response.EventInstances = EventTriggers.ToList();
                 }
                 catch (Exception ex)
@@ -147,26 +144,31 @@ namespace ActionEventLib.events
         {
             try
             {
-                Topic += Element.Name.LocalName + "/";
-
-                if (!Element.HasAttribute(NS_WTOPIC + "topic"))
-                    foreach (XElement el in Element.Elements())
-                        getTopics(Topic, Triggers, el);
-                else
+                //Go one level lower and check for topic
+                foreach (XElement el in Element.Elements())
                 {
-                    //create new eventTrigger with Topic & IsProperty attribute
-                    newEventTrigger = new EventTrigger(Topic.Remove(Topic.Length - 1, 1), Element.Element(NS_EVENT + "MessageInstance").HasAttribute(NS_EVENT + "isProperty"));
+                    if (!el.HasAttribute(NS_WTOPIC + "topic"))
+                    {
+                        getTopics(Topic + el.GetNameSpacePrefix() + el.Name.LocalName + "/", Triggers, el);
+                    }
+                    else
+                    {
+                        //create new eventTrigger with Topic & IsProperty attribute
+                        newEventTrigger = new EventTrigger(Topic + el.GetNameSpacePrefix() + el.Name.LocalName, el.Element(NS_EVENT + "MessageInstance").HasAttribute(NS_EVENT + "isProperty"));
 
-                    //Check for SourceInstance Tag and parse the SimpleItemInstance
-                    if (Element.Element(NS_EVENT + "MessageInstance").HasElement(NS_EVENT + "SourceInstance"))
-                        this.parseEventTriggerParam(Element.Element(NS_EVENT + "MessageInstance").Element(NS_EVENT + "SourceInstance").Element(NS_EVENT + "SimpleItemInstance"), newEventTrigger);
+                        //Check for SourceInstance Tag and parse the SimpleItemInstance
+                        if (el.Element(NS_EVENT + "MessageInstance").HasElement(NS_EVENT + "SourceInstance"))
+                            this.parseEventTriggerParam(el.Element(NS_EVENT + "MessageInstance").Element(NS_EVENT + "SourceInstance").Element(NS_EVENT + "SimpleItemInstance"), newEventTrigger);
 
-                    //Check for DataInstance Tag and parse the simpleiteminstance
-                    if (Element.Element(NS_EVENT + "MessageInstance").HasElement(NS_EVENT + "DataInstance"))
-                        this.parseEventTriggerParam(Element.Element(NS_EVENT + "MessageInstance").Element(NS_EVENT + "DataInstance").Element(NS_EVENT + "SimpleItemInstance"), newEventTrigger);
+                        //Check for DataInstance Tag and parse the simpleiteminstance
+                        if (el.Element(NS_EVENT + "MessageInstance").HasElement(NS_EVENT + "DataInstance"))
+                            this.parseEventTriggerParam(el.Element(NS_EVENT + "MessageInstance").Element(NS_EVENT + "DataInstance").Element(NS_EVENT + "SimpleItemInstance"), newEventTrigger);
 
-                    Triggers.Add(newEventTrigger);
-                }
+                        Triggers.Add(newEventTrigger);
+                    }
+
+
+                }                
             }
             catch (Exception ex)
             {

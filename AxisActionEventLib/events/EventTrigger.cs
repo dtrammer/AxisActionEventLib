@@ -9,6 +9,7 @@ namespace ActionEventLib.events
 {
     public class EventTrigger
     {
+        public bool addMessageContent = true;
         public bool isProperty { get; set; }
         public string TopicExpression { get; set; }
         public Dictionary<string, EventTriggerParam> Parameters = new Dictionary<string, EventTriggerParam>();
@@ -33,11 +34,11 @@ namespace ActionEventLib.events
             StringBuilder sb = new StringBuilder();
             sb.Append(@"<wsnt:TopicExpression Dialect=""http://docs.oasis-open.org/wsn/t-1/TopicExpression/Concrete"">" + TopicExpression + "</wsnt:TopicExpression>");
 
-            if (this.Parameters.Count > 0)
+            if (this.Parameters.Count > 0 && this.addMessageContent)
             {
                 sb.Append(@"<wsnt:MessageContent Dialect=""http://www.onvif.org/ver10/tev/messageContentFilter/ItemFilter"">");
 
-                foreach(KeyValuePair<string,EventTriggerParam> kv in this.Parameters)
+                foreach (KeyValuePair<string, EventTriggerParam> kv in this.Parameters)
                 {
                     sb.Append(kv.Value.ToString());
                     sb.Append(" and ");
