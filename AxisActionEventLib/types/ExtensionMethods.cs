@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace AxisActionEventLib.types
+namespace ActionEventLib.types
 {
     public static class ExtensionMethods
     {
@@ -36,6 +36,18 @@ namespace AxisActionEventLib.types
             if (Element.HasAttribute(AttributeName))
                 return Element.Attribute(AttributeName).Value;
             else
+                return string.Empty;
+        }
+        public static string GetNameSpacePrefix(this XElement Element)
+        {
+            if (Element.Name.Namespace != string.Empty)
+            {
+                string prefix = Element.GetPrefixOfNamespace(Element.Name.Namespace);
+                if (prefix != string.Empty && prefix != "")
+                    return prefix + ":";
+                else
+                    return string.Empty;
+            }else
                 return string.Empty;
         }
         #endregion
