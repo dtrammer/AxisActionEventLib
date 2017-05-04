@@ -15,7 +15,7 @@ namespace ActionEventLibTests
     {
         string VALID_USER = "root";
         string VALID_PASS = "pass";
-        string VALID_IP = "192.168.1.223";
+        string VALID_IP = "192.168.1.20";
         string WRONG_IP = "192.168.1.67777";
         string WRONG_USERPASS = "rooooot";
 
@@ -481,10 +481,57 @@ namespace ActionEventLibTests
             Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
         }
 
+        [TestMethod]
+        public async Task Setup_ActionRule_Full_Sample_OnMyACAPEvent()
+        {
+            //Sync templates and eventinstances, this could be done once and stored globally 
+            //as in 95% of cases all devices share the same templates and event instances
+            GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
+            GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
+
+            //Create an ActionConfiguration first,
+            //By passing a ActionTemplate instance, the ActionCofig will directly import the necessary action and associated recipient template parameters
+            //To get a quick overview (text output) of the possible template parameters, runt the "Get_ActionTemplates" test method 
+            ActionConfiguration BlinkLed = new ActionConfiguration(aTemplates.Templates["com.axis.action.fixed.ledcontrol"]);
+
+            BlinkLed.Parameters["interval"] = "250";
+            BlinkLed.Parameters["led"] = "statusled";
+            BlinkLed.Parameters["color"] = "red,none";
+            BlinkLed.Parameters["duration"] = "5";
+
+            ServiceResponse AddConfigResponse = await actionService.AddActionConfigurationAsync(VALID_IP, VALID_USER, VALID_PASS, BlinkLed);
+
+            Console.WriteLine("Add new action config : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and config ID : " + BlinkLed.ConfigID);
+
+            //VMD3 - TopicExpression - tns1:RuleEngine/tnsaxis:RuleEngine/VMD3/vmd3_video_1
+
+            ActionRule NewAcapTrigger = new ActionRule()
+            {
+                Name = "CX JPG",
+                Enabled = true,
+                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tnsaxis:CameraApplicationPlatform/MyTickerApp"), //correct version tnsaxis:CameraApplicationPlatform/MyTickerApp
+                Configuration = BlinkLed,
+            };
+
+            NewAcapTrigger.SetActivationTimeout(0);
+            NewAcapTrigger.Trigger.addMessageContent = false;
+            //Added this 
+
+            //newMotionDetectionRule.Trigger.Parameters["event"].Value = "0"; //Is the default value - for quick overview run Test GetEventInstances
+            //newMotionDetectionRule.Trigger.Parameters["areaid"].Value = "1"; //Is the default value - for quick overview run Test GetEventInstances
+            //newMotionDetectionRule.Trigger.Parameters["areapolygon"].Value = "0"; //=True, it takes a boolean value but does not work with True / False directly
+
+            //Add the rule to the device, either create a new ServiceResponse instance but you can use the AddConfigResponse instance as well
+            AddConfigResponse = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS, NewAcapTrigger);
+
+            Console.WriteLine("Add new action rule : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and rule ID : " + NewAcapTrigger.RuleID);
+
+            //Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
+        }
 
         ///SAMPLE - Create ActionRule - Preset Reached - Led Flashes 5 seconds
         [TestMethod]
-        public async Task Setup_ActionRule_Sample_2()
+        public async Task Setup_ActionRule_Sample_OnPresetReachedBlinkLed()
         {
             GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
             GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
@@ -519,6 +566,48 @@ namespace ActionEventLibTests
             AddConfigResponse = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS, PresetReachedRule);
 
             Console.WriteLine("Add new action rule : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and rule ID : " + PresetReachedRule.RuleID);
+
+            Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
+
+        }
+
+        ///SAMPLE - Create ActionRule - Tampering - Led Flashes 5 seconds
+        [TestMethod]
+        public async Task Setup_ActionRule_Sample_OnTamperingBlinkLed()
+        {
+            GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
+            GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
+
+            //Create an ActionConfiguration first,
+            //By passing a ActionTemplate instance, the ActionCofig will directly import the necessary action and associated recipient template parameters
+            //To get a quick overview (text output) of the possible template parameters, run the "Get_ActionTemplates" test method 
+            ActionConfiguration BlinkLed = new ActionConfiguration(aTemplates.Templates["com.axis.action.fixed.ledcontrol"]);
+
+            BlinkLed.Parameters["interval"] = "250";
+            BlinkLed.Parameters["led"] = "statusled";
+            BlinkLed.Parameters["color"] = "red,none";
+            BlinkLed.Parameters["duration"] = "5";
+
+            ServiceResponse AddConfigResponse = await actionService.AddActionConfigurationAsync(VALID_IP, VALID_USER, VALID_PASS, BlinkLed);
+            Console.WriteLine("Add new action config : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and config ID : " + BlinkLed.ConfigID);
+
+
+            ActionRule OnTamperingRule = new ActionRule()
+            {
+                Name = "OnTampering",
+                Enabled = true,
+                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:VideoSource/tnsaxis:Tampering"),
+                Configuration = BlinkLed,
+            };
+
+            OnTamperingRule.SetActivationTimeout(10);
+            OnTamperingRule.Trigger.Parameters["tampering"].Value = "1";
+            OnTamperingRule.Trigger.Parameters["channel"].Value = "1";
+
+            //Add the rule to the device, either create a new ServiceResponse instance but you can use the AddConfigResponse instance as well
+            AddConfigResponse = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS, OnTamperingRule);
+
+            Console.WriteLine("Add new action rule : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and rule ID : " + OnTamperingRule.RuleID);
 
             Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
 
