@@ -1,4 +1,4 @@
-<H2>C# AxisActionEventLib 1.0</H2>
+<H2>C# AxisActionEventLib 1.1</H2>
 
 Base library that provides connectivity with the new Action and Event web-services API of Axis network cameras or devices.
 
