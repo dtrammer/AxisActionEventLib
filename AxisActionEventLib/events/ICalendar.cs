@@ -34,11 +34,11 @@ namespace ActionEventLib.events
         }
 
         /// <summary>
-        /// Constructor to create a recurrence (pulse event)
+        /// Constructor to create a recurrence (pulse event), ex: ICalendar(PulseInterval.DAILY , 1) = Once a day recurrence
         /// </summary>
-        /// <param name="Interval"></param>
-        /// <param name="Recurrence"></param>
-        public ICalendar(int Interval , PulseInterval Recurrence )
+        /// <param name="Recurrence">PulseInterval enum : SECONDLY, MINUTELY, HOURLY, DAILY </param>
+        /// <param name="Interval">The number of repitions for the PulseInterval </param>
+        public ICalendar(PulseInterval Recurrence, int Interval)
         {
             if (Interval == 0 || Interval < 0)
                 throw new Exception("[ICalendar] Interval must be higher than 0");
