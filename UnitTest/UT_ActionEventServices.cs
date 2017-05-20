@@ -329,7 +329,7 @@ namespace ActionEventLibTests
             ScheduledEvent se = new ScheduledEvent()
             {
                 Name = "UnitTestScheduledEvent",
-                Schedule = new ICalendar(10, PulseInterval.MINUTELY)
+                Schedule = new ICalendar(PulseInterval.MINUTELY, 10)
             };
 
             ServiceResponse response = await eventService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS,se);
@@ -422,7 +422,6 @@ namespace ActionEventLibTests
             Assert.IsTrue(resp.IsSuccess);
         }
 
-
         #endregion
 
         #region Full sammple tests
@@ -431,10 +430,8 @@ namespace ActionEventLibTests
         //Setup an ActionRule that triggers on VMD3 motion detection and add an extra virtual input trigger condition
         //  So if Motion is detected and the virtual input state is active the event will trigger
         [TestMethod]
-        public async Task Setup_ActionRule_Full_Sample()
+        public async Task Setup_ActionRule_Full_Sample_OnMotionDetected_SendFilesToNetworkShare()
         {
-            //Sync templates and eventinstances, this could be done once and stored globally 
-            //as in 95% of cases all devices share the same templates and event instances
             GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
             GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
 
@@ -465,7 +462,7 @@ namespace ActionEventLibTests
             {
                 Name = "MD Rule",
                 Enabled = true,
-                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:RuleEngine/tnsaxis:VMD3/vmd3_video_1"),
+                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:RuleEngine/tnsaxis:VMD3/vmd3_video_1"), //Run Get_EventInstances TestMethod for list output of all available events
                 Configuration = sendToNetworkShareConfig,
             };
 
@@ -481,11 +478,10 @@ namespace ActionEventLibTests
             Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
         }
 
+        ///SAMPLE - Create ActionRule - ACAP event - Led Flashes 5 seconds
         [TestMethod]
         public async Task Setup_ActionRule_Full_Sample_OnMyACAPEvent()
         {
-            //Sync templates and eventinstances, this could be done once and stored globally 
-            //as in 95% of cases all devices share the same templates and event instances
             GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
             GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
 
@@ -514,19 +510,14 @@ namespace ActionEventLibTests
             };
 
             NewAcapTrigger.SetActivationTimeout(0);
-            NewAcapTrigger.Trigger.addMessageContent = false;
-            //Added this 
-
-            //newMotionDetectionRule.Trigger.Parameters["event"].Value = "0"; //Is the default value - for quick overview run Test GetEventInstances
-            //newMotionDetectionRule.Trigger.Parameters["areaid"].Value = "1"; //Is the default value - for quick overview run Test GetEventInstances
-            //newMotionDetectionRule.Trigger.Parameters["areapolygon"].Value = "0"; //=True, it takes a boolean value but does not work with True / False directly
+            NewAcapTrigger.Trigger.addMessageContent = false; //Default is True but sometimes must be set on false for certain ACAP events this has to be on a per ACAP base
 
             //Add the rule to the device, either create a new ServiceResponse instance but you can use the AddConfigResponse instance as well
             AddConfigResponse = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS, NewAcapTrigger);
 
             Console.WriteLine("Add new action rule : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and rule ID : " + NewAcapTrigger.RuleID);
 
-            //Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
+            Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
         }
 
         ///SAMPLE - Create ActionRule - Preset Reached - Led Flashes 5 seconds
@@ -554,13 +545,13 @@ namespace ActionEventLibTests
             {
                 Name = "PresetReachedRule",
                 Enabled = true,
-                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:PTZController/tnsaxis:PTZPresets/Channel_1"),
+                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:PTZController/tnsaxis:PTZPresets/Channel_1"), //Run Get_EventInstances TestMethod for list output of all available events
                 Configuration = BlinkLed,
             };
 
             PresetReachedRule.SetActivationTimeout(10);
-            PresetReachedRule.Trigger.Parameters["PresetToken"].Value = "-1"; //See Test GetEventInstances to see eventInstances output and lookup parameters
-            PresetReachedRule.Trigger.Parameters["on_preset"].Value = "1"; // Bool value is indicate with 1 / 0
+            PresetReachedRule.Trigger.Parameters["PresetToken"].Value = "-1"; //See Test GetEventInstances output to see eventInstances and possible parameters
+            PresetReachedRule.Trigger.Parameters["on_preset"].Value = "1"; // Bool value is indicated with 1 / 0
 
             //Add the rule to the device, either create a new ServiceResponse instance but you can use the AddConfigResponse instance as well
             AddConfigResponse = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS, PresetReachedRule);
@@ -611,6 +602,165 @@ namespace ActionEventLibTests
 
             Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
 
+        }
+
+        ///SAMPLE - Create ActionRule - Led Flashes 5 seconds on Daily Recurrence
+        [TestMethod]
+        public async Task Setup_ActionRule_Sample_OnDailyReccuringEvent_BlinkLed()
+        {
+            //Create a daily recurrence event, after adding the scheduled event and upon sucess, the ScheduledEvent.EventID will be populated  with the ID assigned by the device. 
+            //This ID needs to be used to setup the action trigger later in this sample
+            ScheduledEvent myDailyRecurrence = new ScheduledEvent("DailyRecurrence", new ICalendar(PulseInterval.DAILY, 1));
+            ServiceResponse MyRecurrenceEvent = await eventService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, myDailyRecurrence);
+            //Output
+            Console.WriteLine("Scheduled event created : Success " + MyRecurrenceEvent.IsSuccess + " device event ID : " + myDailyRecurrence.EventID);
+            
+            //Get the action templates supported by the device 
+            GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
+            //Create an ActionConfiguration
+            //By passing a ActionTemplate instance, the ActionCofig will directly import the necessary action and associated recipient template parameters
+            //To get a quick overview (text output) of the possible template parameters, run the "Get_ActionTemplates" test method 
+            ActionConfiguration BlinkLed = new ActionConfiguration(aTemplates.Templates["com.axis.action.ledcontrol"]);
+            //Set the action config paramters
+            BlinkLed.Parameters["interval"] = "250";
+            BlinkLed.Parameters["led"] = "statusled";
+            BlinkLed.Parameters["color"] = "red,none";
+            BlinkLed.Parameters["duration"] = "5";
+            //Add the action config to the device
+            ServiceResponse AddConfigResponse = await actionService.AddActionConfigurationAsync(VALID_IP, VALID_USER, VALID_PASS, BlinkLed);
+            //Output
+            Console.WriteLine("ActionConfig Created : Add new action config : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and config ID : " + BlinkLed.ConfigID);
+            
+            //Get the event instances suppported by the device, this will also contain our previously created daily recurrence event
+            GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
+            ActionRule OnRecurrence = new ActionRule()
+            {
+                Name = "OnRecurrence_APITest",
+                Enabled = true,
+                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:UserAlarm/tnsaxis:Recurring/tnsaxis:Pulse"), //See GetEventInstances output for the correct event name
+                Configuration = BlinkLed,
+            };
+            //Set the event trigger properties and parameters
+            OnRecurrence.SetActivationTimeout(10);
+            OnRecurrence.Trigger.Parameters["id"].Value = myDailyRecurrence.EventID; //To get a list of the event parameters look at the Get_eventIntsances Test method output
+            //Add the rule to the device, either create a new ServiceResponse instance but you can use the AddConfigResponse instance as well
+            AddConfigResponse = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS, OnRecurrence);
+            //Output
+            Console.WriteLine("Add new action rule : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and rule ID : " + OnRecurrence.RuleID);
+            //Test conditions
+            Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
+        }
+
+        ///SAMPLE - Create ActionRule - Led Flashes 5 seconds on Daily Recurrence with extra OnLiveStream accessed condition
+        [TestMethod]
+        public async Task Setup_ActionRule_Sample_OnDailyReccuringEvent_WithExtraCondition_BlinkLed()
+        {
+            //Create a daily recurrence event, after adding the scheduled event and upon sucess, the ScheduledEvent.EventID will be populated  with the ID assigned by the device. 
+            //This ID needs to be used to setup the action trigger later in this sample
+            ScheduledEvent myDailyRecurrence = new ScheduledEvent("DailyRecurrence", new ICalendar(PulseInterval.DAILY, 1));
+            ServiceResponse MyRecurrenceEvent = await eventService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, myDailyRecurrence);
+            //Output
+            Console.WriteLine("Scheduled event created : Success " + MyRecurrenceEvent.IsSuccess + " device event ID : " + myDailyRecurrence.EventID);
+
+            //Get the action templates supported by the device 
+            GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
+            //Create an ActionConfiguration
+            //By passing a ActionTemplate instance, the ActionCofig will directly import the necessary action and associated recipient template parameters
+            //To get a quick overview (text output) of the possible template parameters, run the "Get_ActionTemplates" test method 
+            ActionConfiguration BlinkLed = new ActionConfiguration(aTemplates.Templates["com.axis.action.fixed.ledcontrol"]);
+            //Set the action config paramters
+            BlinkLed.Parameters["interval"] = "250";
+            BlinkLed.Parameters["led"] = "statusled";
+            BlinkLed.Parameters["color"] = "red,none";
+            BlinkLed.Parameters["duration"] = "5";
+            //Add the action config to the device
+            ServiceResponse AddConfigResponse = await actionService.AddActionConfigurationAsync(VALID_IP, VALID_USER, VALID_PASS, BlinkLed);
+            //Output
+            Console.WriteLine("ActionConfig Created : Add new action config : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and config ID : " + BlinkLed.ConfigID);
+
+            //Get the event instances suppported by the device, this will also contain our previously created daily recurrence event
+            GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
+            ActionRule OnRecurrenceAndStreamAccessBlink = new ActionRule()
+            {
+                Name = "OnDailyRecurrenceAndStreamAccessBlink",
+                Enabled = true,
+                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:UserAlarm/tnsaxis:Recurring/Pulse"), //See GetEventInstances output for the correct event name
+                Configuration = BlinkLed,
+            };
+            //Set the event trigger properties and parameters
+            OnRecurrenceAndStreamAccessBlink.SetActivationTimeout(10);
+            OnRecurrenceAndStreamAccessBlink.Trigger.Parameters["id"].Value = myDailyRecurrence.EventID; //To get a list of the event parameters look at the Get_eventIntsances Test method output
+            //Create an extra eventtrigger condition, you can get an instance from the eInstances 
+            EventTrigger OnLiveStreamAccessCondition = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:VideoSource/tnsaxis:LiveStreamAccessed");
+            OnLiveStreamAccessCondition.Parameters["accessed"].Value = "1"; //True - "0" for false
+            //Add the trigger to the action rule conditions
+            OnRecurrenceAndStreamAccessBlink.AddExtraCondition(OnLiveStreamAccessCondition);
+            //Add the rule to the device, either create a new ServiceResponse instance but you can use the AddConfigResponse instance as well
+            AddConfigResponse = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS, OnRecurrenceAndStreamAccessBlink);
+            //Output
+            Console.WriteLine("Add new action rule : Success " + AddConfigResponse.IsSuccess + " response ID : " + AddConfigResponse.Content + " and rule ID : " + OnRecurrenceAndStreamAccessBlink.RuleID);
+            //Test conditions
+            Assert.IsTrue(AddConfigResponse.IsSuccess && AddConfigResponse.Content != "0");
+        }
+
+        ///InProgress - SAMPLE - Create ActionRule - TimeLapse send 1 picture to email every hour but only between 9PM and 11PM and weekdays
+        [TestMethod]
+        public async Task Setup_ActionRule_Sample_OnceEveryHour_And_between9and11_SendPictureToEmail()
+        {
+            //Create the hourly recurrence first and add to device
+            ScheduledEvent myHourlyRecurrence = new ScheduledEvent("HourlyRecurrence", new ICalendar(PulseInterval.HOURLY , 1));
+            ServiceResponse deviceResponse = await eventService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, myHourlyRecurrence);
+            if(deviceResponse.IsSuccess) //Recurrence added
+            {
+                //Create the Weekdays evening schedule annd add to device
+                ScheduledEvent myWeeklyEveningSchedule = new ScheduledEvent("WeeklyEvening", new ICalendar(new ScheduleTime(21), new ScheduleTime(23), new ScheduleDay[] { ScheduleDay.MO, ScheduleDay.TU, ScheduleDay.WE, ScheduleDay.TH, ScheduleDay.FR }));
+                deviceResponse = await eventService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, myWeeklyEveningSchedule);
+                if(deviceResponse.IsSuccess) //Schedule added
+                {
+                    //First get the possible templates for the device
+                    GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
+                    if(aTemplates.IsSuccess)
+                    {
+                        //Now create the action template based on template instance- Send SMTP with picture attached
+                        ActionConfiguration SendSMTP = new ActionConfiguration(aTemplates.Templates["com.axis.action.fixed.notification.smtp"]);
+                        //Set the action config paramters
+                        SendSMTP.Parameters["subject"] = "Week evenings timeLapse";
+                        SendSMTP.Parameters["message"] = "Photo %d";
+                        SendSMTP.Parameters["email_to"] = "trammerd@gmail.com";
+                        SendSMTP.Parameters["email_from"] = "MyAxisCamera@axis.com";
+                        SendSMTP.Parameters["host"] = "smtprelay.gmail.com";
+                        SendSMTP.Parameters["port"] = "557";
+                        SendSMTP.Parameters["login"] = "";
+                        SendSMTP.Parameters["password"] = "";
+
+                        //Add the action config to the device
+                        deviceResponse = await actionService.AddActionConfigurationAsync(VALID_IP, VALID_USER, VALID_PASS, SendSMTP);
+                        if(deviceResponse.IsSuccess)
+                        {
+                            //Get the event instances suppported by the device, the collection will also contain our previously created schedule and recurrence event this way
+                            GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
+                            ActionRule OnEveryWeekDayEveningHourSendPicture = new ActionRule()
+                            {
+                                Name = "OnEveryWeekDayEveningHourSendPicture",
+                                Enabled = true,
+                                Trigger = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:UserAlarm/tnsaxis:Recurring/Pulse"), //See GetEventInstances output for the correct event name
+                                Configuration = SendSMTP,
+                            };
+
+                            OnEveryWeekDayEveningHourSendPicture.Trigger.Parameters["id"].Value = myHourlyRecurrence.EventID;
+                            //Create and add extra condition to Action Rule
+                            EventTrigger OnWeekDayEveningSchedule = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:UserAlarm/tnsaxis:Recurring/Interval");
+                            OnWeekDayEveningSchedule.Parameters["id"].Value = myWeeklyEveningSchedule.EventID;
+                            OnEveryWeekDayEveningHourSendPicture.AddExtraCondition(OnWeekDayEveningSchedule);
+
+                            //Create action rule on device
+                            deviceResponse = await actionService.AddActionRuleAsync(VALID_IP, VALID_USER, VALID_PASS, OnEveryWeekDayEveningHourSendPicture);
+
+                            Assert.IsTrue(deviceResponse.IsSuccess);
+                        }
+                    }
+                }
+            }
         }
 
         #endregion
