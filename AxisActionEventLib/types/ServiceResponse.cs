@@ -33,5 +33,4 @@ namespace ActionEventLib.types
     public class GetRecipientConfigurationsResponse : ServiceResponse { public List<RecipientConfiguration> Configurations = new List<RecipientConfiguration>(); }
     public class GetEventInstancesResponse : ServiceResponse { public List<EventTrigger> EventInstances = new List<EventTrigger>(); }
     public class GetScheduledEventsResponse : ServiceResponse { public List<ScheduledEvent> ScheduledEvents = new List<ScheduledEvent>();  }
-
 }
