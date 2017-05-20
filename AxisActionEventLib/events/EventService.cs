@@ -232,8 +232,8 @@ namespace ActionEventLib.events
         {
             if (Response.IsSuccess)
             {
-                Event.EventID = Response.SOAPContent.Element(NS_EVENT + "AddScheduledEventResponse").Element(NS_EVENT + "EventID").Value;
-                Response.Content = Response.SOAPContent.Element(NS_EVENT + "AddScheduledEventResponse").Element(NS_EVENT + "EventID").Value;
+                Event.EventID = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_EVENT + "AddScheduledEventResponse").Element(NS_EVENT + "EventID").Value;
+                Response.Content = Response.SOAPContent.Element(NS_SOAP_ENV + "Body").Element(NS_EVENT + "AddScheduledEventResponse").Element(NS_EVENT + "EventID").Value;
             }
 
             return Response;
