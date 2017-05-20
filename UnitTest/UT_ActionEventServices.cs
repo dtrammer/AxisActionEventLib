@@ -63,7 +63,7 @@ namespace ActionEventLibTests
     #endregion
 
         #region Action Rules
-    [TestMethod]
+        [TestMethod]
         public async Task Get_ActionRules()
         {
             GetActionRulesResponse response = await actionService.GetActionRulesAsync(VALID_IP, VALID_USER, VALID_PASS);
@@ -430,7 +430,7 @@ namespace ActionEventLibTests
         //Setup an ActionRule that triggers on VMD3 motion detection and add an extra virtual input trigger condition
         //  So if Motion is detected and the virtual input state is active the event will trigger
         [TestMethod]
-        public async Task Setup_ActionRule_Full_Sample_OnMotionDetected_SendFilesToNetworkShare()
+        public async Task Setup_ActionRule_Sample_OnMotionDetected_SendFilesToNetworkShare()
         {
             GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
             GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
@@ -480,7 +480,7 @@ namespace ActionEventLibTests
 
         ///SAMPLE - Create ActionRule - ACAP event - Led Flashes 5 seconds
         [TestMethod]
-        public async Task Setup_ActionRule_Full_Sample_OnMyACAPEvent()
+        public async Task Setup_ActionRule_Sample_OnMyACAPEvent()
         {
             GetActionTemplatesResponse aTemplates = await actionService.GetActionTemplatesAsync(VALID_IP, VALID_USER, VALID_PASS);
             GetEventInstancesResponse eInstances = await eventService.GetEventsInstancesAsync(VALID_IP, VALID_USER, VALID_PASS);
