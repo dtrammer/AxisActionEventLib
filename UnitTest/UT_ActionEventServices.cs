@@ -15,7 +15,7 @@ namespace ActionEventLibTests
     {
         string VALID_USER = "root";
         string VALID_PASS = "pass";
-        string VALID_IP = "192.168.1.20";
+        string VALID_IP = "10.21.66.187";
         string WRONG_IP = "192.168.1.67777";
         string WRONG_USERPASS = "rooooot";
 
@@ -713,7 +713,7 @@ namespace ActionEventLibTests
             if(deviceResponse.IsSuccess) //Recurrence added
             {
                 //Create the Weekdays evening schedule annd add to device
-                ScheduledEvent myWeeklyEveningSchedule = new ScheduledEvent("WeeklyEvening", new ICalendar(new ScheduleTime(21), new ScheduleTime(23), new ScheduleDay[] { ScheduleDay.MO, ScheduleDay.TU, ScheduleDay.WE, ScheduleDay.TH, ScheduleDay.FR }));
+                ScheduledEvent myWeeklyEveningSchedule = new ScheduledEvent("WorkingDays", new ICalendar(new ScheduleTime(17,30), new ScheduleTime(21), new ScheduleDay[] { ScheduleDay.MO, ScheduleDay.TU, ScheduleDay.WE, ScheduleDay.TH, ScheduleDay.FR }));
                 deviceResponse = await eventService.Add_ScheduledEventAsync(VALID_IP, VALID_USER, VALID_PASS, myWeeklyEveningSchedule);
                 if(deviceResponse.IsSuccess) //Schedule added
                 {
@@ -728,8 +728,8 @@ namespace ActionEventLibTests
                         SendSMTP.Parameters["message"] = "Photo %d";
                         SendSMTP.Parameters["email_to"] = "trammerd@gmail.com";
                         SendSMTP.Parameters["email_from"] = "MyAxisCamera@axis.com";
-                        SendSMTP.Parameters["host"] = "smtprelay.gmail.com";
-                        SendSMTP.Parameters["port"] = "557";
+                        SendSMTP.Parameters["host"] = "smtp-relay.gmail.com";
+                        SendSMTP.Parameters["port"] = "587";
                         SendSMTP.Parameters["login"] = "";
                         SendSMTP.Parameters["password"] = "";
 
@@ -751,6 +751,7 @@ namespace ActionEventLibTests
                             //Create and add extra condition to Action Rule
                             EventTrigger OnWeekDayEveningSchedule = eInstances.EventInstances.Find(x => x.TopicExpression == "tns1:UserAlarm/tnsaxis:Recurring/Interval");
                             OnWeekDayEveningSchedule.Parameters["id"].Value = myWeeklyEveningSchedule.EventID;
+                            OnWeekDayEveningSchedule.Parameters["active"].Value = "1";
                             OnEveryWeekDayEveningHourSendPicture.AddExtraCondition(OnWeekDayEveningSchedule);
 
                             //Create action rule on device
